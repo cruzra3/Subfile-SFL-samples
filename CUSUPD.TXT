@@ -1,0 +1,13 @@
+     FCUSTPF  UF  E           K        DISK
+     ICUSTDS    E DSCUSTPF
+     ISAVEDS      DS                            250
+->   C           *ENTRY    PLIST
+->   C                     PARM           CUSTDS
+     C                     MOVELCUSTDS    SAVEDS
+     C           CCUST     CHAINCUSTR                90
+     C           *IN90     IFEQ *OFF
+     C                     MOVELSAVEDS    CUSTDS
+     C                     UPDATCUSTR
+     C                     ENDIF
+     C                     MOVEL*ON       *INLR
+     C                     RETRN

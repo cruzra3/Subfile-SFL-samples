@@ -1,0 +1,515 @@
+      *==============================================================*
+      * SFL015 - Invoice/Payment Matching; Side-by-Side              *
+      *          (c) Copyright Jonathan E. Yergin, 1991 USA          *
+      *              &  Wayne Madden, 1993 USA                       *
+      *==============================================================*
+      *
+     FINVPF   IF  E           K        DISK
+     FPAYPF   IF  E           K        DISK
+     FSFL015DFCF  E                    WORKSTN      KINFDS WSDS
+     F                                        SFLRN KSFILE SFL
+      *
+      * MODS definitions
+     IINVDS     E DSINVPF                    14
+     IPAYDS     E DSPAYPF                    14
+      *
+      * Standard include for all interactive programs
+      *   named hexadecimal constants for function keys
+     I              X'31'                 C         @F01
+     I              X'32'                 C         @F02
+     I              X'33'                 C         @F03
+     I              X'34'                 C         @F04
+     I              X'35'                 C         @F05
+     I              X'36'                 C         @F06
+     I              X'37'                 C         @F07
+     I              X'38'                 C         @F08
+     I              X'39'                 C         @F09
+     I              X'3A'                 C         @F10
+     I              X'3B'                 C         @F11
+     I              X'3C'                 C         @F12
+     I              X'B1'                 C         @F13
+     I              X'B2'                 C         @F14
+     I              X'B3'                 C         @F15
+     I              X'B4'                 C         @F16
+     I              X'B5'                 C         @F17
+     I              X'B6'                 C         @F18
+     I              X'B7'                 C         @F19
+     I              X'B8'                 C         @F20
+     I              X'B9'                 C         @F21
+     I              X'BA'                 C         @F22
+     I              X'BB'                 C         @F23
+     I              X'BC'                 C         @F24
+     I              X'BD'                 C         @CLEAR
+     I              X'F1'                 C         @ENTER
+     I              X'F3'                 C         @HELP
+     I              X'F4'                 C         @PAGUP
+     I              X'F5'                 C         @PAGDN
+     I              X'F6'                 C         @PRINT
+      *
+      * Standard include for all interactive programs
+      *   Defines standard constants
+     I              '0'                   C         @FALSE
+     I              '1'                   C         @TRUE
+      *
+      * Standard include for all interactive programs
+      *   display file information data structure
+     IWSDS        DS
+      *               Identifies the key pressed
+     I                                      369 369 KEY
+      *               Identifies the subfile page rrn
+     I                                    B 378 3790PAGRRN
+      * Row and Column number
+     I                                      370 371 ROWCOL
+      *
+     I            DS
+     I                                    B   1   20COL
+     I                                        2   2 COLA
+      *
+      *==============================================================*
+      * Program mainline                                             *
+      *==============================================================*
+      *
+     C                     EXSR @LOAD
+      *
+      * Perform until exit requested using F03 or F12
+     C           @EXIT     DOUEQ@TRUE
+      *
+     C                     WRITESFLHDR
+     C                     WRITESFLCMD
+     C                     EXFMTSFLCTL
+      *
+      * Process response
+     C           KEY       CASEQ@F03      @F03SR            F03 exit
+     C           KEY       CASEQ@F12      @F12SR            F12 cancel
+     C           KEY       CASEQ@PAGUP    @PGUP             Page Up
+     C           KEY       CASEQ@PAGDN    @PGDN             Page Down
+     C                     CAS            @SFLRD            Enter
+     C                     ENDCS
+      *
+     C                     ENDDO
+      *
+      * End of program, you can modify to leave *INLR = *OFF
+      *   and program will still work properly when called again
+      *
+     C                     MOVE *ON       *INLR
+     C                     RETRN
+      *
+      *==============================================================*
+      * Subroutine Section of Program                                *
+      *==============================================================*
+      *
+      *==============================================================*
+      * Initialization Subroutine                                    *
+      *==============================================================*
+      *
+     C           *INZSR    BEGSR
+      *
+     C                     Z-ADD0         SFLRN   40
+     C           *LIKE     DEFN SFLRN     OCCUR
+     C           *LIKE     DEFN SFLRN     BOTLN1
+     C           *LIKE     DEFN SFLRN     BOTLN2
+     C           *LIKE     DEFN SFLRN     CENTER
+     C                     Z-ADD36        CENTER
+      *
+     C           *LIKE     DEFN ICUST     KCUST
+     C           *LIKE     DEFN ICUST     SICUST
+     C           *LIKE     DEFN IINV#     KINV#
+     C           *LIKE     DEFN IINV#     SIINV#
+     C           *LIKE     DEFN IIDAT     KIDAT
+     C           *LIKE     DEFN IIDAT     SIIDAT
+      *
+     C           *LIKE     DEFN PCUST     SPCUST
+     C           *LIKE     DEFN PCHK#     KCHK#
+     C           *LIKE     DEFN PCHK#     SPCHK#
+     C           *LIKE     DEFN PCDAT     KCDAT
+     C           *LIKE     DEFN PCDAT     SPCDAT
+      *
+      * Create program exit flag and set value to @FALSE
+     C                     MOVE @FALSE    @EXIT   1
+      * Create error flag and set value to @FALSE
+     C                     MOVE @FALSE    @ERR    1
+      *
+      *  Key list definitions.
+     C           INVKEY    KLIST
+     C                     KFLD           KCUST
+     C                     KFLD           KINV#
+     C                     KFLD           KIDAT
+      *
+     C           PAYKEY    KLIST
+     C                     KFLD           KCUST
+     C                     KFLD           KCHK#
+     C                     KFLD           KCDAT
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      * Load records into MODS                                       *
+      *==============================================================*
+      *
+     C           @LOAD     BEGSR
+      *
+      * Load next set of invoice data.
+     C                     EXSR @BLDIN
+      * Load next set of payment data.
+     C                     EXSR @BLDPY
+      * Build actual subfile
+     C                     EXSR @BLDSF
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      * Build subfile                                                *
+      *==============================================================*
+      *
+     C           @BLDSF    BEGSR
+      *
+      * Clear subfile
+     C                     EXSR @RESET
+      *
+      * Build subfile records from MODS
+     C                     DO   13        SFLRN
+      *
+      * Load invoice fields
+     C           SFLRN     OCUR INVDS
+     C           ICUST     IFNE *ZEROS
+     C                     MOVE *OFF      *IN12
+     C           IIDAT     MULT 100.0001  IIMDY
+     C                     ELSE
+     C                     MOVE *ON       *IN12
+     C                     Z-ADD0         IIMDY
+     C                     ENDIF
+      *
+      *    Load payment fields.
+     C           SFLRN     OCUR PAYDS
+     C           PCUST     IFNE *ZEROS
+     C                     MOVE *OFF      *IN13
+     C           PCDAT     MULT 100.0001  PCMDY
+     C                     ELSE
+     C                     MOVE *ON       *IN13
+     C                     Z-ADD0         PCMDY
+     C                     ENDIF
+      *
+     C                     WRITESFL
+     C                     ENDDO
+      *
+      *  Set data structures to the unused occurence.
+     C           14        OCUR INVDS
+     C           14        OCUR PAYDS
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      *  Reposition to previous set of invoice data.                 *
+      *==============================================================*
+      *
+     C           @PRVIN    BEGSR
+      *
+      *  Already at BOF?, then message
+     C           *IN93     IFEQ *ON
+     C                     MOVE *ON       *IN60
+     C                     ELSE
+      *
+      *  If not BOF, reset EOF indicator and reposition file.
+     C                     MOVE *OFF      *IN91
+      *
+     C                     Z-ADDSICUST    KCUST
+     C                     Z-ADDSIINV#    KINV#
+     C                     Z-ADDSIIDAT    KIDAT
+     C           INVKEY    SETLLINVPF
+      *
+     C                     ADD  12        BOTLN1
+      *
+     C                     DO   BOTLN1
+     C                     READPINVPF                    93
+      *    If sucessful read, save key fields of last record read.
+     C           *IN93     IFEQ *OFF
+     C                     Z-ADDICUST     SICUST
+     C                     Z-ADDIINV#     SIINV#
+     C                     Z-ADDIIDAT     SIIDAT
+     C                     ENDIF
+      *
+     C                     ENDDO
+      *
+      *  Load next set of invoice data.
+     C                     EXSR @BLDIN
+     C                     ENDIF
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      *  Reposition to previous set of payment data.                 *
+      *==============================================================*
+      *
+     C           @PRVPY    BEGSR
+      *
+      *  If BOF, display error.
+     C           *IN94     IFEQ *ON
+     C                     MOVE *ON       *IN60
+     C                     ELSE
+      *
+      *  If not BOF, reset EOF indicator and reposition file.
+     C                     MOVE *OFF      *IN92
+      *
+     C                     MOVE SPCUST    KCUST
+     C                     MOVE SPCHK#    KCHK#
+     C                     MOVE SPCDAT    KCDAT
+     C           PAYKEY    SETLLPAYR
+      *
+     C                     ADD  12        BOTLN2
+      *
+     C                     DO   BOTLN2
+     C                     READPPAYR                     94
+      *    If sucessful read, save key fields of last record read.
+     C           *IN94     IFEQ *OFF
+     C                     MOVE PCUST     SPCUST
+     C                     MOVE PCHK#     SPCHK#
+     C                     MOVE PCDAT     SPCDAT
+     C                     ENDIF
+     C                     ENDDO
+      *
+      *  Load next set of payment data.
+     C                     EXSR @BLDPY
+     C                     ENDIF
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      *  Load next set of invoice data.                              *
+      *==============================================================*
+      *
+     C           @BLDIN    BEGSR
+      *
+      *  If EOF, display error.
+     C           *IN91     IFEQ *ON
+     C                     MOVE *ON       *IN60
+     C                     ELSE
+      *
+      *  If not EOF, reset BOF indicator ...
+     C                     MOVE *OFF      *IN93
+      *  Position file and READP to check BOF condition.
+     C                     Z-ADDSICUST    KCUST
+     C                     Z-ADDSIINV#    KINV#
+     C                     Z-ADDSIIDAT    KIDAT
+     C           INVKEY    SETLLINVPF
+     C                     READPINVPF                    93
+      *  Position file again.
+     C           INVKEY    SETLLINVR
+      *
+      *  Load multi-occurence data structure with invoice data.
+     C                     DO   13        OCCUR
+     C           OCCUR     OCUR INVDS
+     C                     READ INVPF                    91
+      *
+      *    If sucessful read, save key fields of last record read.
+     C           *IN91     IFEQ *OFF
+     C                     Z-ADDICUST     SICUST
+     C                     Z-ADDIINV#     SIINV#
+     C                     Z-ADDIIDAT     SIIDAT
+     C                     Z-ADDOCCUR     BOTLN1
+      *    If EOF, clear DS fields.
+     C                     ELSE
+     C                     Z-ADD0         ICUST
+     C                     Z-ADD0         IINV#
+     C                     Z-ADD0         IIDAT
+     C                     Z-ADD0         IGAMT
+     C                     ENDIF
+     C                     ENDDO
+      *
+      *  Read once more to check EOF condition.
+     C           14        OCUR INVDS
+     C                     READ INVPF                    91
+      *    If sucessful read, save key fields of last record read.
+     C           *IN91     IFEQ *OFF
+     C                     Z-ADDICUST     SICUST
+     C                     Z-ADDIINV#     SIINV#
+     C                     Z-ADDIIDAT     SIIDAT
+     C                     Z-ADDOCCUR     BOTLN1
+     C                     ENDIF
+     C                     ENDIF
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      *  Load next set of payment data.                              *
+      *==============================================================*
+      *
+     C           @BLDPY    BEGSR
+      *
+      *  If EOF, display error.
+     C           *IN92     IFEQ *ON
+     C                     MOVE *ON       *IN42
+     C                     ELSE
+      *
+      *  If not EOF, reset BOF indicator ...
+     C                     MOVE *OFF      *IN94
+      *  Position file and READP to check BOF condition.
+     C                     Z-ADDSPCUST    KCUST
+     C                     Z-ADDSPCHK#    KCHK#
+     C                     Z-ADDSPCDAT    KCDAT
+     C           PAYKEY    SETLLPAYPF
+     C                     READPPAYPF                    94
+      *  Position file again.
+     C           PAYKEY    SETLLPAYPF
+      *
+      *  Load multi-occurence data structure with invoice data.
+     C                     DO   13        OCCUR
+     C           OCCUR     OCUR PAYDS
+     C                     READ PAYPF                    92
+      *
+      *    If sucessful read, save key fields of last record read.
+     C           *IN92     IFEQ *OFF
+     C                     Z-ADDPCUST     SPCUST
+     C                     Z-ADDPCHK#     SPCHK#
+     C                     Z-ADDPCDAT     SPCDAT
+     C                     Z-ADDOCCUR     BOTLN2
+      *    If EOF, clear DS fields.
+     C                     ELSE
+     C                     Z-ADD0         PCUST
+     C                     Z-ADD0         PCHK#
+     C                     Z-ADD0         PCDAT
+     C                     Z-ADD0         PCAMT
+     C                     MOVE *BLANKS   PCREF
+     C                     ENDIF
+      *
+     C                     ENDDO
+      *
+      *  Read once more to check EOF condition.
+     C           14        OCUR PAYDS
+     C                     READ PAYPF                    92
+      *    If sucessful read, save key fields of last record read.
+     C           *IN92     IFEQ *OFF
+     C                     Z-ADDPCUST     SPCUST
+     C                     Z-ADDPCHK#     SPCHK#
+     C                     Z-ADDPCDAT     SPCDAT
+     C                     Z-ADDOCCUR     BOTLN2
+     C                     ENDIF                           -4-
+     C                     ENDIF                           -1-
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      * Clear subfile                                                *
+      *==============================================================*
+      *
+     C           @RESET    BEGSR
+      *
+      * Clear subfile and reset subfile display indicator.
+     C                     MOVE *ON       *IN40
+     C                     WRITESFLCTL
+     C                     MOVE *OFF      *IN40
+      *
+      * Reset subfile record number and subfile position fields.
+     C                     RESETSFLRN
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      *  Roll-down processing.                                       *
+      *==============================================================*
+      *
+     C           @PGUP     BEGSR
+      *
+      *  Convert cursor position to column.
+     C                     Z-ADD0         COL
+     C                     MOVE ROWCOL    COLA
+      *
+      *  Perform roll-down routine based on cursor position.
+     C           COL       CASLECENTER    @PRVIN
+     C           COL       CASGTCENTER    @PRVPY
+     C                     ENDCS
+      *
+      *  Build subfile
+     C                     EXSR @BLDSF
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      *  Roll-up processing.                                         *
+      *==============================================================*
+      *
+     C           @PGDN     BEGSR
+      *
+      *  Convert cursor position to column.
+     C                     Z-ADD0         COL
+     C                     MOVE ROWCOL    COLA
+      *
+      *  Perform roll-up routine based on cursor position.
+     C           COL       CASLECENTER    @BLDIN
+     C           COL       CASGTCENTER    @BLDPY
+     C                     ENDCS
+      *
+      *  Build subfile
+     C                     EXSR @BLDSF
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      * Read changed records in subfile to check for selection       *
+      *==============================================================*
+      *
+     C           @SFLRD    BEGSR
+      *
+      *  Clear return variables and message display indicator.
+     C                     CLEARCUSNBR
+     C                     CLEARINVNBR
+     C                     CLEARCHKNBR
+     C                     MOVE *OFF      *IN11
+      *
+     C           CUSNBR    DOWEQ0
+     C           CHKNBR    OREQ 0
+      *
+     C                     READCSFL                      98
+      *
+      *    Return the Customer and Invoice numbers of selected record.
+     C           *IN98     IFEQ *ON
+     C                     LEAVE
+     C                     ELSE
+      *
+     C           SELIO1    IFEQ 1
+     C           CUSNBR    ANDEQ0
+     C                     Z-ADDICUST     CUSNBR
+     C                     Z-ADDIINV#     INVNBR
+     C                     CLEARSELIO1
+     C                     ENDIF
+      *
+      *    Return the Check number of selected record.
+     C           SELIO2    IFEQ 1
+     C           CHKNBR    ANDEQ0
+     C                     Z-ADDPCHK#     CHKNBR
+     C                     CLEARSELIO2
+     C                     ENDIF
+      *
+     C                     UPDATSFL
+     C                     ENDIF
+      *
+     C                     ENDDO
+      *
+      *  If variables returned, set message display indicator.
+     C           CUSNBR    IFNE 0
+     C           CHKNBR    ANDNE0
+     C                     MOVE *ON       *IN11
+     C                     ENDIF
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      * F03 key subroutine                                           *
+      *==============================================================*
+      *
+     C           @F03SR    BEGSR
+      *
+      * set exit program flag
+     C                     MOVE @TRUE     @EXIT
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      * F12 key subroutine                                           *
+      *==============================================================*
+      *
+     C           @F12SR    BEGSR
+      *
+      * set exit program flag
+     C                     MOVE @TRUE     @EXIT
+      *
+     C                     ENDSR

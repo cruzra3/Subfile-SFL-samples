@@ -1,0 +1,16 @@
+/*********************************************************************/
+/*    Program Name:  SFL008CL                                        */
+/*    Description:   ITEM TRANSACTION ENTRY W/SFLINZ                 */
+/*                                                                   */
+/*    (c) Copyright Jonathan E. Yergin, 1991 USA                     */
+/*        & Wayne Madden, 1993 USA                                   */
+/*********************************************************************/
+
+  PGM
+
+  CALL SFL008
+
+  RCLRSC
+
+FINISH:
+  ENDPGM

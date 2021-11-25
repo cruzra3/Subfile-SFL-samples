@@ -1,0 +1,70 @@
+      *==============================================================*
+      *  SFL015DF - INVOICE/PAYMENT MATCHING; SIDE-BY-SIDE DISPLAY   *
+      *  (c) Copyright Jonathan E. Yergin, 1991 USA                  *
+      *     & Wayne Madden, 1993 USA                                 *
+      *==============================================================*
+      *
+     A                                      DSPSIZ(24 80 *DS3)
+     A                                      PRINT
+      *
+     A          R SFLHDR
+     A                                  1 30'Invoice/Payment Matching'
+     A                                      DSPATR(HI)
+     A                                  3  1'Type options, press Enter.'
+     A                                      COLOR(BLU)
+     A                                  4  3'1=Select' COLOR(BLU)
+      *
+     A          R SFL                       SFL
+     A            SELIO1         1Y 0B  8  2VALUES(0 1) EDTCDE(4)
+     A  12                                  DSPATR(PR ND)
+     A            ICUST     R        O  8  4REFFLD(ICUST INVPF) EDTCDE(4)
+     A            IINV#     R        O  8 10REFFLD(IINV# INVPF) EDTCDE(4)
+     A            IIMDY          6Y 0O  8 18EDTWRD('  /  /  ')
+     A            IGAMT     R        O  8 27REFFLD(IGAMT INVPF) EDTCDE(4)
+     A                                  8 36':' COLOR(BLU)
+     A            SELIO2         1Y 0B  8 38VALUES(0 1) EDTCDE(4)
+     A  13                                  DSPATR(PR ND)
+     A            PCUST     R        O  8 40REFFLD(PCUST PAYPF) EDTCDE(4)
+     A            PCHK#     R        O  8 46REFFLD(PCHK# PAYPF) EDTCDE(4)
+     A            PCMDY          6Y 0O  8 52EDTWRD('  /  /  ')
+     A            PCAMT     R        O  8 61REFFLD(PCAMT PAYPF) EDTCDE(4)
+     A            PCREF     R        O  8 70REFFLD(PCREF PAYPF)
+      *
+     A          R SFLCTL                    SFLCTL(SFL)
+     A                                      CA03 CA12
+     A                                      PAGEUP PAGEDOWN
+     A                                      BLINK OVERLAY
+     A N40                                  SFLDSP SFLDSPCTL
+     A  40                                  SFLCLR
+     A                                      SFLSIZ(13) SFLPAG(13)
+     A  60                                  SFLMSG('Roll up or down is beyond f-
+     A                                      irst or last record in file.' 60)
+     A                                  5 10'- - - I N V O I C E - - -'
+     A                                      DSPATR(HI)
+     A                                  5 46'- - - C H E C K - - - -'
+     A                                      DSPATR(HI)
+     A                                  6  4'Cust# Number    Date     Amount   -
+     A                                        Cust# Number  Date     Amount Ref-
+     A                                      erence' DSPATR(HI)
+     A                                  7  2'1=Select ........................ -
+     A                                      : 1=Select ........................-
+     A                                      .........' COLOR(BLU)
+      *
+     A          R SFLCMD
+     A                                      OVERLAY
+     A                                 21  2'.........................'
+     A                                      COLOR(BLU)
+     A N91                             21 28'More...' DSPATR(HI)
+     A  91                             21 28' Bottom' DSPATR(HI)
+     A                                 21 36': ................................-
+     A                                      ..' COLOR(BLU)
+     A N92                             21 73'More...' DSPATR(HI)
+     A  92                             21 73' Bottom' DSPATR(HI)
+     A  11                             22  2'Customer:' DSPATR(HI)
+     A  11        CUSNBR    R        O 22 13REFFLD(ICUST INVPF) DSPATR(HI)
+     A  11                             22 21'Invoice:' DSPATR(HI)
+     A  11        INVNBR    R        O 22 31REFFLD(IINV# INVPF) DSPATR(HI)
+     A  11                             22 41'Check:' DSPATR(HI)
+     A  11        CHKNBR    R        O 22 49REFFLD(PCHK# PAYPF) DSPATR(HI)
+     A                                 23  2'F3=Exit' COLOR(BLU)
+     A                                 23 14'F12=Cancel' COLOR(BLU)

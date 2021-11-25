@@ -1,0 +1,20 @@
+      *
+      *  SFL001PM - CONTEXTUAL SEARCH PROMPT
+      *  (c) Copyright Jonathan E. Yergin, 1991 USA
+      *
+     A                                      DSPSIZ(24 80 *DS3) PRINT
+     A          R FM01
+     A                                      BLINK
+     A                                      CA03(03 'Exit')
+     A                                      CA12(12 'Cancel')
+     A                                  1  2DATE
+     A                                      EDTCDE(Y)
+     A                                  1 12TIME
+     A                                  1 31'Customer Master Search'
+     A                                      DSPATR(HI)
+     A                                  3  2'Enter data for contextual search, -
+     A                                      press Enter:' COLOR(BLU)
+     A                                  4  4'Search data . . .'
+     A            CONTEXT       25   B  4 24CHECK(LC)
+     A                                 23  2'F3=Exit' COLOR(BLU)
+     A                                 23 14'F12=Cancel' COLOR(BLU)

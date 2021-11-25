@@ -1,0 +1,71 @@
+      *==============================================================*
+      *  SFL011DF - CUSTOMER CONTACT UPDATE DISPLAY FILE             *
+      *  (c) Copyright Jonathan E. Yergin, 1991 USA                  *
+      *    & Wayne Madden, 1993 USA                                  *
+      *==============================================================*
+      *
+     A                                      DSPSIZ(24 80 *DS3) PRINT
+     A                                      REF(CUSTPF)
+      *
+     A          R SFLHDR
+     A                                  1  2'SFL011'
+     A                                  1 31'Customer Contact Update'
+     A                                      DSPATR(HI)
+      *
+     A          R SFL                       SFL
+     A  08                                  SFLNXTCHG
+     A            CNAME     R        O  7  5
+     A            CCUST     R        O  7 32EDTCDE(3)
+     A            CCITY     R        O  7 40
+     A            CSTACD    R        O  7 62
+     A            CZIPCD    R        O  7 68
+     A            CCONT     R        B  8 20CHECK(LC)
+     A  71
+     AON71
+     AAN72                                  DSPATR(PC)
+     A  71                                  DSPATR(RI)
+     A            SPHON1         1Y 0B  8 48
+     A  72                                  DSPATR(RI PC)
+     A            SPHON2         3Y 0B  8 50
+     A  72                                  DSPATR(RI)
+     A            SPHON3         3Y 0B  8 54
+     A  72                                  DSPATR(RI)
+     A            SPHON4         4Y 0B  8 58
+     A  72                                  DSPATR(RI)
+      *
+     A          R SFLCTL                    SFLCTL(SFL)
+     A                                      SFLSIZ(9) SFLPAG(8)
+     A                                      BLINK OVERLAY
+     A                                      CA03 CA12
+     A                                      PAGEDOWN
+     A  40                                  SFLCLR
+     A                                      SFLDSPCTL
+     A  42                                  SFLDSP
+     A  99                                  SFLEND
+     A  60                                  SFLMSG('Roll up or down beyond fir-
+     A                                      st or last record in subfile.' 60)
+     A            SFLPS          4S 0H      SFLRCDNBR
+     A                                  3  2'Search for . . .'
+     A            SEARCH        25A  I  3 21CHECK(LC)
+     A                                  5  2'   Customer Name              Numb-
+     A                                      er  City                 State  Zip'
+     A                                      DSPATR(HI)
+     A                                  6 20'Contact                     Teleph-
+     A                                      one'
+     A                                      DSPATR(HI)
+      *
+     A          R SFLCMD
+     A                                      OVERLAY
+     A                                 23  2'F3=Exit' COLOR(BLU)
+     A                                 23 14'F12=Cancel' COLOR(BLU)
+      *
+     A          R MSGSFL                    SFL
+     A                                      SFLMSGRCD(24)
+     A            MSGKEY                    SFLMSGKEY
+     A            PGMQ                      SFLPGMQ
+      *
+     A          R MSGCTL                    SFLCTL(MSGSFL)
+     A                                      BLINK OVERLAY
+     A N40                                  SFLDSP SFLDSPCTL SFLINZ SFLEND
+     A                                      SFLSIZ(2) SFLPAG(1)
+     A            PGMQ                      SFLPGMQ

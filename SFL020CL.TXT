@@ -1,0 +1,35 @@
+/*********************************************************************/
+/*    Program Name:  SFL020CL                                        */
+/*    Description:  CUSTOMER MASTER SEARCH                           */
+/*                                                                   */
+/*    (c) Copyright Jonathan E. Yergin, 1991 USA                     */
+/*        & Wayne Madden, 1993 USA                                   */
+/*********************************************************************/
+
+  PGM
+
+  DCL  &fkey      *CHAR      1
+  DCL  &@f03      *CHAR      1  VALUE(x'33')
+  DCL  &@f12      *CHAR      1  VALUE(x'3C')
+
+  DCLF SFL020PM
+
+  CHGVAR &CUSTR VALUE(0)
+
+/*  Display prompt.                                                  */
+
+DISPLAY:
+  SNDRCVF
+
+/* Check function key pressed on prompt screen                       */
+  IF (&IN03 *OR &IN12) GOTO FINISH
+
+  CALL SFL020 PARM(&scmod &custr &fkey)
+
+/* Check function key pressed in RPG program, if any                 */
+  IF (&fkey = &@f03) GOTO FINISH
+  GOTO DISPLAY
+
+FINISH:
+  RCLRSC
+  ENDPGM

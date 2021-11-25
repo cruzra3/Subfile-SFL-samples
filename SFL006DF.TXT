@@ -1,0 +1,55 @@
+      *==============================================================*
+      *  SFL006DF - ITEM TRANSACTIONS REVIEW DISPLAY FILE            *
+      *  (c) Copyright Jonathan E. Yergin, 1991 USA                  *
+      *    & Wayne Madden, 1993 USA                                  *
+      *==============================================================*
+      *
+     A                                      DSPSIZ(24 80 *DS3) PRINT
+     A                                      ERRSFL
+     A
+     A          R SFLHDR
+     A                                  1  2'SFL006'
+     A                                  1 33'Item Transactions' DSPATR(HI)
+      *
+     A          R SFL                       SFL
+     A                                      CHGINPDFT
+     A            SELIO          1S 0I  7  3VALUES(0 4)
+     A N09                                  DSPATR(UL)
+     A  09                                  DSPATR(PR)
+     A            SRRN           2Y 0O  7  6EDTWRD('  .')
+     A            SITEM     R        O  7 11REFFLD(DITEM TRANSPF)
+     A                                      EDTCDE(4)
+     A            SVEND     R        O  7 23REFFLD(DVEND TRANSPF)
+     A                                      EDTCDE(4)
+     A            IDESC     R        O  7 33REFFLD(IDESC ITEMPF)
+     A  09                                  DSPATR(RI)
+     A            DQNTY     R        H      REFFLD(DQNTY TRANSPF)
+     A            SQNTY     R     Y  B  7 63REFFLD(DQNTY TRANSPF)
+     A                                      EDTCDE(4) CHECK(RB)
+     A N09                                  DSPATR(UL)
+     A  09                                  DSPATR(PR)
+      *
+     A          R SFLCTL                    SFLCTL(SFL)
+     A                                      BLINK OVERLAY
+     A                                      CA03 CA12
+     A  40                                  SFLCLR
+     A                                      SFLDSPCTL
+     A  42                                  SFLDSP
+     A  99                                  SFLEND(*MORE)
+     A                                      SFLSIZ(16) SFLPAG(15)
+     A  60                                  SFLMSG('Roll up or down beyond fir-
+     A                                      st or last record in subfile.' 60)
+     A            SFLPS          4S 0H      SFLRCDNBR(CURSOR)
+     A                                  3  1'Type options, press Enter.'
+     A                                      COLOR(BLU)
+     A                                  4  3'4=Delete' COLOR(BLU)
+     A                                  4 42'Position cursor at sequence . . .'
+     A            NEWPS          4S 0I  4 76RANGE(1 9999)
+     A                                  6  2'Sel' DSPATR(HI)
+     A                                  6  6'Seq     Item    Vendor     Descr-
+     A                                      iption                 Quantity'
+     A                                      DSPATR(HI)
+      *
+     A          R SFLCMD                    OVERLAY
+     A                                 23  2'F3=Exit' COLOR(BLU)
+     A                                 23 14'F12=Cancel' COLOR(BLU)

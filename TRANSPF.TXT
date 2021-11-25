@@ -1,0 +1,8 @@
+      *   TRANSPF - Transaction file description
+     A                                      UNIQUE
+     A          R TRANS                     TEXT('Item Transactions Entry')
+     A            DITEM     R     P         REFFLD(IITEM ITEMPF)
+     A            DVEND     R     P         REFFLD(VVEND VENDPF)
+     A            DQNTY          5P 0       TEXT('Transaction Quantity')
+     A          K DITEM
+     A          K DVEND

@@ -1,0 +1,265 @@
+      *
+      *  NRQSFL - NON-RECURSIVE QUICK SORT ROUTINE FOR SUBFILES
+      *  (c) Copyright Jonathan E. Yergin, 1991 USA
+      *
+      *---------------------------------------------------------------*
+      *  This program uses a Quick Sort algorithm based on code
+      *  (with some adjustments) that was presented in the article
+      *  "Removing Recursion From Algorithms", by Gary Syck, in
+      *  "The C Users Journal", February 1991, pp. 25-31.
+      *---------------------------------------------------------------*
+      *
+      *  JEY  03/26/91  Original version.
+      *
+      *  PARAMETERS
+      *    FIELD       TYPE   LEN DEC   DESCRIPTION
+      *    B           I        5  0    Begin record
+      *    E           I        5  0    End record
+      *    F           I        3  0    From position
+      *    T           I        3  0    To position
+      *
+      *  INDICATOR REFERENCE
+      *    90  Provides break function for DOW loop
+      *    91  Record not found
+      *
+     FNRQSFLDFCF  E                    WORKSTN
+     F                                        SFLRRNKSFILE SORTSFL
+     E                    DTA        80  1
+     IRECDS       DS
+     I                                        1  80 DATA
+     ITMPDS       DS                             80
+     ISWAPDS      DS                             80
+      *----------------------------------------------------*
+      *  Program entry parameter list.
+      *----------------------------------------------------*
+     C           *ENTRY    PLIST
+     C                     PARM           B       50       Begin
+     C                     PARM           E       50       End
+     C                     PARM           F       30
+     C                     PARM           T       30
+      *
+      *----------------------------------------------------*
+      *  Field definitions.
+      *----------------------------------------------------*
+      *
+     C           *LIKE     DEFN B         SFLRRN
+     C           *LIKE     DEFN B         I                i
+     C           *LIKE     DEFN E         J                j
+     C           *LIKE     DEFN B         I#LESS           (i - 1)
+     C           *LIKE     DEFN B         I#PLUS           (i + 1)
+     C           *LIKE     DEFN T         TP               (T + 1)
+      *
+     C           *LIKE     DEFN DATA      VALUE
+     C           *LIKE     DEFN DATA      COMP
+     C           *LIKE     DEFN DATA      RESULT
+      *
+      *----------------------------------------------------*
+      *  Program initialization.
+      *----------------------------------------------------*
+      *
+     C*  Initialize Data Queue variables.
+     C                     MOVEL'STACKDQ' DATAQ@ 10        Data queue
+     C                     MOVEL'*LIBL'   DQLIB@ 10        DTAQ library
+     C                     MOVE 5         FLDLN@  50       Field length
+     C                     MOVE *ZEROS    WAITS@  50       Wait seconds
+     C                     MOVE *BLANKS   FIELD@  5        Data field
+     C                     MOVE *BLANKS   DQOPCD  4        Op code
+      *
+      *  Clear the stack.  (In case entries left from abend.)
+     C                     MOVE 'POP '    DQOPCD
+     C           FLDLN@    DOUEQ*ZEROS                     -1-
+     C                     EXSR XPRCDQ
+     C                     END                             -1-
+      *
+      *  Reset the field length.
+     C                     MOVE 5         FLDLN@
+      *
+      *  Initialize work field (T + 1).
+     C           T         ADD  1         TP
+      *
+      *----------------------------------------------------*
+      *  Main processing.
+      *----------------------------------------------------*
+      *
+      *  do { ... }  while ( StackPoint );
+     C           FLDLN@    DOUEQ*ZEROS                     -2-
+      *
+      *    Value = List[End];
+     C                     MOVE E         SFLRRN
+     C                     EXSR XGETSF
+     C                     MOVE RESULT    VALUE
+      *    i = Begin - 1;
+     C           B         SUB  1         I
+      *    j = End;
+     C                     Z-ADDE         J
+      *
+      *    do { ... }  while ( j > i );
+     C           J         DOWGTI                          -3-
+      *
+      *      while ( List[++i] < Value );
+     C                     ADD  1         I
+     C                     MOVE I         SFLRRN
+     C                     EXSR XGETSF
+     C                     MOVE RESULT    COMP
+     C           COMP      DOWLTVALUE                      -4-
+     C                     ADD  1         I
+     C                     MOVE I         SFLRRN
+     C                     EXSR XGETSF
+     C                     MOVE RESULT    COMP
+     C                     END                             -4-
+      *
+      *      while ( List[--j] > Value );
+     C                     SUB  1         J
+     C                     MOVE J         SFLRRN
+     C                     EXSR XGETSF
+     C                     MOVE RESULT    COMP
+     C                     MOVE '0'       *IN90
+     C           COMP      DOWGTVALUE                      -5-
+     C                     SUB  1         J
+      *        If j goes to zero, set it to 1 and exit loop.
+     C           J         IFEQ *ZEROS                     -6-
+     C                     ADD  1         J
+     C                     MOVE '1'       *IN90
+     C                     ELSE                            -6-
+      *        Else, continue.
+     C                     MOVE J         SFLRRN
+     C                     EXSR XGETSF
+     C                     MOVE RESULT    COMP
+     C                     END                             -6-
+     C  N90                END                             -5-
+      *
+      *      Tmp = List[i];
+     C                     MOVE I         SFLRRN
+     C                     EXSR XGETSF
+     C                     MOVE RECDS     TMPDS
+      *      List[i] = List[j];
+     C                     MOVE J         SFLRRN
+     C                     EXSR XGETSF
+     C                     MOVE RECDS     SWAPDS
+      *
+     C                     MOVE I         SFLRRN
+     C                     EXSR XGETSF
+     C                     MOVE SWAPDS    RECDS
+     C                     EXSR XUPDSF
+      *      List[j] = Tmp;
+     C                     MOVE J         SFLRRN
+     C                     EXSR XGETSF
+     C                     MOVE TMPDS     RECDS
+     C                     EXSR XUPDSF
+      *
+     C                     END                             -3-
+      *
+      *    List[j] = List[i];
+     C                     MOVE I         SFLRRN
+     C                     EXSR XGETSF
+     C                     MOVE RECDS     SWAPDS
+      *
+     C                     MOVE J         SFLRRN
+     C                     EXSR XGETSF
+     C                     MOVE SWAPDS    RECDS
+     C                     EXSR XUPDSF
+      *    List[i] = List[End];
+     C                     MOVE E         SFLRRN
+     C                     EXSR XGETSF
+     C                     MOVE RECDS     SWAPDS
+      *
+     C                     MOVE I         SFLRRN
+     C                     EXSR XGETSF
+     C                     MOVE SWAPDS    RECDS
+     C                     EXSR XUPDSF
+      *    List[End] = Tmp;
+     C                     MOVE E         SFLRRN
+     C                     EXSR XGETSF
+     C                     MOVE TMPDS     RECDS
+     C                     EXSR XUPDSF
+      *
+      *    Set-up work fields for (i - 1) and (i + 1).
+     C           I         SUB  1         I#LESS
+     C           I         ADD  1         I#PLUS
+      *
+      *    If( i - 1 > Begin )
+     C           I#LESS    IFGT B                          -7-
+      *      Stack[StackPoint++] = i - 1;
+     C                     MOVELI#LESS    FIELD@
+     C                     MOVE 'PUSH'    DQOPCD
+     C                     EXSR XPRCDQ
+      *      Stack[StackPoint++] = Begin;
+     C                     MOVELB         FIELD@
+     C                     MOVE 'PUSH'    DQOPCD
+     C                     EXSR XPRCDQ
+     C                     END                             -7-
+      *
+      *    If( End > i + 1 )
+     C           E         IFGT I#PLUS                     -8-
+      *      Stack[StackPoint++] = End;
+     C                     MOVELE         FIELD@
+     C                     MOVE 'PUSH'    DQOPCD
+     C                     EXSR XPRCDQ
+      *      Stack[StackPoint++] = i + 1;
+     C                     MOVELI#PLUS    FIELD@
+     C                     MOVE 'PUSH'    DQOPCD
+     C                     EXSR XPRCDQ
+     C                     END                             -8-
+      *
+      *    Begin = Stack[--StackPoint];
+     C                     MOVE 'POP '    DQOPCD
+     C                     EXSR XPRCDQ
+     C                     MOVELFIELD@    B
+      *    End = Stack[--StackPoint];
+     C                     MOVE 'POP '    DQOPCD
+     C                     EXSR XPRCDQ
+     C                     MOVELFIELD@    E
+      *
+     C                     END                             -2-
+      *
+      *  Return.
+     C                     RETRN
+      *
+      *----------------------------------------------------*
+      *  Retrieve data from requested subfile record.
+      *----------------------------------------------------*
+     C           XGETSF    BEGSR
+      *
+      *  Retrieve subfile record and extract the data.
+     C           SFLRRN    CHAINSORTSFL              91
+     C                     MOVEADATA      DTA
+     C                     MOVEA*BLANKS   DTA,TP
+     C                     MOVEADTA,F     RESULT
+      *
+     C                     ENDSR
+      *
+      *----------------------------------------------------*
+      *  Update the most recently retrieved subfile record.
+      *----------------------------------------------------*
+     C           XUPDSF    BEGSR
+      *
+     C                     UPDATSORTSFL
+      *
+     C                     ENDSR
+      *
+      *----------------------------------------------------*
+      *  Process a Data Queue request.
+      *----------------------------------------------------*
+     C           XPRCDQ    BEGSR
+      *
+      *  PUSH data onto the stack.
+     C           DQOPCD    IFEQ 'PUSH'                     -1-
+     C                     CALL 'QSNDDTAQ'
+     C                     PARM           DATAQ@
+     C                     PARM           DQLIB@
+     C                     PARM           FLDLN@
+     C                     PARM           FIELD@
+     C                     ELSE                            -1-
+      *
+      *  POP data off the stack.
+     C           DQOPCD    IFEQ 'POP '                     -2-
+     C                     CALL 'QRCVDTAQ'
+     C                     PARM           DATAQ@
+     C                     PARM           DQLIB@
+     C                     PARM           FLDLN@
+     C                     PARM           FIELD@
+     C                     PARM           WAITS@
+     C                     END                             -2-
+     C                     END                             -1-
+      *
+     C                     ENDSR

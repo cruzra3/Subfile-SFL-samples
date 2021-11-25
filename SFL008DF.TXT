@@ -1,0 +1,48 @@
+      *==============================================================*
+      *  SFL008DF - ITEM TRANSACTIONS ENTRY W/SFLINZ AND SFLENTER    *
+      *  (c) Copyright Jonathan E. Yergin, 1991 USA                  *
+      *      @ Wayne Madden, 1993 USA                                *
+      *==============================================================*
+      *
+     A                                      DSPSIZ(24 80 *DS3)
+     A                                      PRINT
+->   A                                      ERRSFL
+      *
+     A          R SFLHDR
+->   A                                  1  2'SFL008'
+     A                                  1 33'Enter Item Transactions'
+     A                                      DSPATR(HI)
+     A                                  3  3'Type the following, then press -
+     A                                       enter.' COLOR(BLU)
+      *
+     A          R SFL                       SFL
+->   A  08                                  SFLNXTCHG
+     A            SITEM     R     Y  B  7  9REFFLD(IITEM ITEMPF)
+     A                                      EDTCDE(4) CHECK(RB) DSPATR(PC)
+->   A  71                                  DSPATR(RI)
+     A            SQNTY     R     Y  B  7 21REFFLD(DQNTY TRANSPF)
+     A                                      EDTCDE(4) CHECK(RB)
+->   A  72                                  DSPATR(RI)
+      *
+     A          R SFLCTL                    SFLCTL(SFL)
+     A                                      SFLSIZ(45) SFLPAG(15)
+     A                                      BLINK OVERLAY
+     A                                      CA03 CA12
+->   A                                      SFLENTER(CF09)
+->   A                                      PAGEDOWN
+     A N40                                  SFLDSP SFLDSPCTL SFLEND
+->   A  40                                  SFLINZ
+->   A  71                                  SFLMSG('Item does not exist' 71)
+->   A  72                                  SFLMSG('Quantity must be > 0' 72)
+     A                                  4 55'Vendor . . .'
+     A            SVEND     R     Y  B  4 68REFFLD(VVEND VENDPF)
+     A                                      EDTCDE(4) CHECK(RB)
+     A  70                                  ERRMSG('Invalid vendor number' 70)
+     A                                  6  2'          Item   Quantity'
+     A                                      DSPATR(HI)
+      *
+     A          R SFLCMD
+     A                                      OVERLAY
+     A                                 23  2'F3=Exit' COLOR(BLU)
+->   A                                 23 14'F9=Continue' COLOR(BLU)
+->   A                                 23 30'F12=Cancel' COLOR(BLU)

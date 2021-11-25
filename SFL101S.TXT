@@ -1,0 +1,20 @@
+/*********************************************************************/
+/*    Program Name:  SFL101S                                         */
+/*    Description:  CUSTOMER MASTER INQUIRY WITH SUBFILE SORT        */
+/*                                                                   */
+/*    (c) Copyright Jonathan E. Yergin, 1991 USA                     */
+/*********************************************************************/
+             PGM
+             MONMSG     MSGID(CPF0000)
+             DLTDTAQ      DTAQ(QTEMP/STACKDQ)
+             CRTDTAQ    DTAQ(QTEMP/STACKDQ) MAXLEN(5) SEQ(*LIFO) +
+                          TEXT('Data Queue for RPG Stack Operations')
+
+             OVRDSPF    FILE(SFL101DF) LVLCHK(*NO) SHARE(*YES)
+             OVRDSPF    FILE(NRQSFLDF) TOFILE(SFL101DF) LVLCHK(*NO) +
+                          SHARE(*YES)
+             CALL       PGM(SFL101)
+             DLTOVR     FILE(*ALL)
+
+             RCLRSC
+ ENDPGM:     ENDPGM

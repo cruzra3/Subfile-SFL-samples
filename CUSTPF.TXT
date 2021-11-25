@@ -1,0 +1,24 @@
+      *  CUSTPF - Customer Master File
+     A                                      UNIQUE
+
+     A          R CUSTR                     TEXT('Customer Master Record')
+
+     A            CCUST          5S 0       COLHDG('Customer' 'Number')
+
+     A            CNAME         25A         COLHDG('Customer' 'Name')
+
+     A            CADDR1        25A         COLHDG('Address' 'Line' '1')
+     A            CADDR2        25A         COLHDG('Address' 'Line' '2')
+     A            CCITY         20A         COLHDG('City')
+     A            CSTACD         2A         COLHDG('State')
+     A                                      TEXT('State Code')
+     A            CZIPCD        10A         COLHDG('Zip')
+     A                                      TEXT('Postal Code')
+
+     A            CARBAL         7P 0       COLHDG('A/R' 'Balance')
+     A            CCRLMT         7P 0       COLHDG('Credit' 'Limit')
+
+     A            CCONT         25A         COLHDG('Contact')
+     A            CPHONE        11P 0       COLHDG('Telephone' 'Number')
+
+     A          K CCUST

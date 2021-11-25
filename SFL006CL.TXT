@@ -1,0 +1,16 @@
+/*********************************************************************/
+/*    Program Name:  SFL006CL                                        */
+/*    Description:  CUSTOMER MASTER UPDATE W/CHAIN EXAMPLE           */
+/*                                                                   */
+/*    (c) Copyright Jonathan E. Yergin, 1991 USA                     */
+/*        & Wayne Madden, 1993 USA                                   */
+/*********************************************************************/
+
+  PGM
+
+  CALL SFL006
+
+  RCLRSC
+
+FINISH:
+  ENDPGM

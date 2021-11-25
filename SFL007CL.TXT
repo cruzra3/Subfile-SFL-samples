@@ -1,0 +1,16 @@
+/*********************************************************************/
+/*    Program Name:  SFL007CL                                        */
+/*    Description:   ITEM TRANSACTION ENTRY EXAMPLE                  */
+/*                                                                   */
+/*    (c) Copyright Jonathan E. Yergin, 1991 USA                     */
+/*        & Wayne Madden, 1993 USA                                   */
+/*********************************************************************/
+
+  PGM
+
+  CALL SFL007
+
+  RCLRSC
+
+FINISH:
+  ENDPGM

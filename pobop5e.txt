@@ -1,0 +1,475 @@
+     F**************************************************************************
+     F* RPG - PROGRAM NARRATIVES STANDARDS                                     *
+     F*       PROGRAM NUMBER..: POPOP5E                                        *
+     F*       PROGRAM TITLE...: PRINT PROGRAM
+     F*       PROGRAMMER NAME.: RAFAEL A. CRUZ                                 *
+     F*       REQUEST.........:                                                *
+     F*       SYSTEM..........: PURCHASING                                     *
+     F*       REVISIONS.......:
+     F*****************************************************************        *
+     F*       FILE DESCRIPTION:
+     F*****************************************************************        *
+     FPSCAREL0  IF   E           K DISK
+     FPOBOPSUL0 IF   E           K DISK    USROPN RENAME(POBOPSU1:FMT0)
+     FPOBOPSUL1 IF   E           K DISK    USROPN RENAME(POBOPSU1:FMT1)
+     FPOBOPSUL2 IF   E           K DISK    USROPN RENAME(POBOPSU1:FMT2)
+     FPOBOPSUL3 IF   E           K DISK    USROPN RENAME(POBOPSU1:FMT3)
+     FPOBOPSUL4 IF   E           K DISK    USROPN RENAME(POBOPSU1:FMT4)
+     FPOBOPSUL5 IF   E           K DISK    USROPN RENAME(POBOPSU1:FMT5)
+     FPOBOP5E$  O    E             PRINTER INFDS(PRINFO)
+
+      * DETAIL PRINTER FILE DS
+     DPRINFO           DS
+     D  @OVER#               188    189B 0
+     D  @LINE#               367    368B 0
+     D  @PAGE#               369    372B 0
+
+      * JOB DATA STRUCTURE
+     D                SDS
+     D  @JOB                 244    253
+     D  @USER                254    263
+     D  @JOBN                264    269  0
+     D  @DATE                276    281  0
+     D  @TIME                282    287  0
+     D  @PGMNAM          *PROC
+     D  @MSGTXT              117    170
+     D#TYPE            S                   LIKE(TYPE)
+     D#ONCE            S              1A
+     D#ONCE1           S              1A
+     DYY               S              2A
+     DMM               S              2A
+     DDD               S              2A
+     DNEWDAT           S              8A
+     DOLDDAT           S              8A
+     DONLYNON          S              1A
+     D@CN              S               D   DIM(1) PERRCD(1) CTDATA
+
+      *---------------------------------------------------------------------
+      * MAINLINE
+      *---------------------------------------------------------------------
+
+     C                   SUB       6             @OVER#
+     C                   EXSR      LOADSELPAG
+     C                   EXSR      PRTSELPAG
+     C                   EXSR      PROCESSFILE
+     C                   EXSR      OVERFLOW
+
+      * FORCE A CONTRACT TYPE TOTAL
+     C                   WRITE     T01
+
+      * FINAL TOTAL
+     C                   WRITE     T02
+     C                   MOVE      *ON           *INLR
+
+      *---------------------------------------------------------------------
+      * SET SELECTION CRITERIA PAGE
+     C     LOADSELPAG    BEGSR
+      *---------------------------------------------------------------------
+
+     C     '001'         CHAIN     PSCAREL0
+     C                   IF        NOT %FOUND( PSCAREL0 )
+     C                   MOVE      *ON           *INLR
+     C                   RETURN
+     C                   ENDIF
+
+      * USER AND PROGRAM
+     C                   MOVEL     @PGMNAM       PGMNAM
+     C                   MOVEL     @USER         USRNAM
+
+      * COMPANIES
+     C                   MOVEL     CAGVST        CO1
+     C                   MOVEL     CAGWST        CO2
+     C                   MOVEL     CAGXST        CO3
+
+      * CONTRACT ADM BUYERS
+     C                   MOVEL     CAGYST        BY1
+     C                   MOVEL     CAGZST        BY2
+     C                   MOVEL     CAG0ST        BY3
+     C                   MOVEL     CAG1ST        BY4
+     C                   MOVEL     CAG2ST        BY5
+     C                   MOVEL     CAG3ST        BY6
+     C                   MOVEL     CAG4ST        BY7
+     C                   MOVEL     CAG5ST        BY8
+     C                   MOVEL     CAHHST        BY9
+     C                   MOVEL     CAHIST        BY10
+     C                   MOVEL     CAHJST        BY11
+     C                   MOVEL     CAHKST        BY12
+     C                   MOVEL     CAHLST        BY13
+     C                   MOVEL     CAHMST        BY14
+     C                   MOVEL     CAHNST        BY15
+     C                   MOVEL     CAHOST        BY16
+     C                   MOVEL     CAHPST        BY17
+     C                   MOVEL     CAHQST        BY18
+     C                   MOVEL     CAHRST        BY19
+     C                   MOVEL     CAHSST        BY20
+     C                   MOVEL     CAHTST        BY21
+     C                   MOVEL     CAHUST        BY22
+     C                   MOVEL     CAHVST        BY23
+     C                   MOVEL     CAHWST        BY24
+     C                   MOVEL     CAHXST        BY25
+     C                   MOVEL     CAHYST        BY26
+     C                   MOVEL     CAHZST        BY27
+     C                   MOVEL     CAH0ST        BY28
+     C                   MOVEL     CAH1ST        BY29
+     C                   MOVEL     CAH2ST        BY30
+     C                   MOVEL     CAH3ST        BY31
+     C                   MOVEL     CAH4ST        BY32
+     C                   MOVEL     CAH5ST        BY33
+     C                   MOVEL     CAH6ST        BY34
+     C                   MOVEL     CAH7ST        BY35
+     C                   MOVEL     CAH8ST        BY36
+     C                   MOVEL     CAH9ST        BY37
+     C                   MOVEL     CAIAST        BY38
+     C                   MOVEL     CAIBST        BY39
+     C                   MOVEL     CAIDST        BY40
+     C                   MOVEL     CAIEST        BY41
+     C                   MOVEL     CAIFST        BY42
+     C                   MOVEL     CAIGST        BY43
+     C                   MOVEL     CAIHST        BY44
+     C                   MOVEL     CAIIST        BY45
+     C                   MOVEL     CAIJST        BY46
+     C                   MOVEL     CAIKST        BY47
+     C                   MOVEL     CAILST        BY48
+     C                   MOVEL     CAIMST        BY49
+     C                   MOVEL     CAINST        BY50
+
+      * CONTRACT TYPES
+     C                   MOVEL     CAEFTX        TY1
+     C                   MOVEL     CAEGTX        TY2
+     C                   MOVEL     CAEHTX        TY3
+     C                   MOVEL     CAEITX        TY4
+     C                   MOVEL     CAEJTX        TY5
+
+      * ONLY NON CONTRACT ADM. BUYERS FLAG
+     C                   MOVEL     CAE0TX        ONLYNON
+
+      * CREATION DATE
+     C     CABADZ        IFEQ      @CN(1)
+     C     CABBDZ        ANDEQ     @CN(1)
+     C                   CLEAR                   CDT1
+     C                   CLEAR                   CDT2
+     C                   ELSE
+     C                   MOVE      CABADZ        CDT1
+     C                   MOVE      CABBDZ        CDT2
+     C                   ENDIF
+
+      * SORT BY FONDO
+     C                   MOVE      CAE2TX        SORTF
+
+      * EXPIRATION DATE
+     C     CABCDZ        IFEQ      @CN(1)
+     C     CAE4TX        ANDEQ     @CN(1)
+     C                   CLEAR                   EDT1
+     C                   CLEAR                   EDT2
+     C                   ELSE
+     C                   MOVE      CABCDZ        EDT1
+     C                   MOVE      CAE4TX        EDT2
+     C                   ENDIF
+
+      * SORT BY GENERAL LIABILITY DATE
+     C                   MOVE      CAE6TX        SORTG
+
+      * GENERAL LIABILITY DATE
+     C     CABDDZ        IFEQ      @CN(1)
+     C     CABEDZ        ANDEQ     @CN(1)
+     C                   CLEAR                   GDT1
+     C                   CLEAR                   GDT2
+     C                   ELSE
+     C                   MOVE      CABDDZ        GDT1
+     C                   MOVE      CABEDZ        GDT2
+     C                   ENDIF
+
+      * SORT BY EXPIRATION DATE
+     C                   MOVE      CAE7TX        SORTE
+
+      * FONDO DATE
+     C     CABFDZ        IFEQ      @CN(1)
+     C     CABGDZ        ANDEQ     @CN(1)
+     C                   CLEAR                   FDT1
+     C                   CLEAR                   FDT2
+     C                   ELSE
+     C                   MOVE      CABFDZ        FDT1
+     C                   MOVE      CABGDZ        FDT2
+     C                   ENDIF
+
+      * SORT BY CREATION DATE
+     C                   MOVE      CAE9TX        SORTC
+
+      * CONTRACT AMOUNT
+     C                   MOVE      CAA3QT        AMT1
+     C                   MOVE      CAA4QT        AMT2
+
+      * SORT BY CONTRACT AMOUNT
+     C                   MOVE      CAFBTX        SORTA
+
+      * SORT BY PO #
+     C                   MOVE      CAPOSO        SORTPO
+     C                   ENDSR
+
+      *---------------------------------------------------------------------
+      * PRINT SELECTION CRITERIA PAGE
+     C     PRTSELPAG     BEGSR
+      *---------------------------------------------------------------------
+
+      * SELECTION PAGE
+     C*                  Z-ADD     1             PAG#
+     C                   WRITE     S01
+     C                   WRITE     S02
+     C                   WRITE     S03
+     C                   WRITE     S04
+     C                   WRITE     S05
+     C                   WRITE     S06
+     C                   WRITE     S07
+     C                   WRITE     S08
+     C                   WRITE     S09
+     C                   WRITE     S10
+     C                   WRITE     S11
+     C                   WRITE     S11B
+     C                   WRITE     S12
+     C                   WRITE     S13
+     C                   WRITE     S14
+     C                   WRITE     S15
+     C                   WRITE     S16
+     C                   WRITE     S17
+     C                   WRITE     S18
+     C                   WRITE     S19
+
+      * HEADERS
+     C*                  EXSR      HEADLINE
+     C                   ENDSR
+
+      *---------------------------------------------------------------------
+      * PROCESS SELECTED FILE
+     C     PROCESSFILE   BEGSR
+      *---------------------------------------------------------------------
+
+     C                   SELECT
+
+      * SORT BY FONDO DATE
+     C     CAE2TX        WHENEQ    'Y'
+     C                   OPEN      POBOPSUL1
+     C     *LOVAL        SETLL     FMT1
+      *+++++++++++++++++++++++
+     C     '1'           DOWEQ     '1'
+     C                   READ      FMT1                                   30
+     C                   IF        *IN30 = *ON
+     C                   LEAVE
+     C                   ENDIF
+     C                   EXSR      DETAILS
+     C                   ENDDO
+      *+++++++++++++++++++++++
+
+      * SORT BY GENERAL LIABILITY DATE
+     C     CAE6TX        WHENEQ    'Y'
+     C                   OPEN      POBOPSUL2
+     C     *LOVAL        SETLL     FMT2
+      *+++++++++++++++++++++++
+     C     '1'           DOWEQ     '1'
+     C                   READ      FMT2                                   30
+     C                   IF        *IN30 = *ON
+     C                   LEAVE
+     C                   ENDIF
+     C                   EXSR      DETAILS
+     C                   ENDDO
+      *+++++++++++++++++++++++
+
+      * SORT BY EXPIRATION DATE
+     C     CAE7TX        WHENEQ    'Y'
+     C                   OPEN      POBOPSUL3
+     C     *LOVAL        SETLL     FMT3
+      *+++++++++++++++++++++++
+     C     '1'           DOWEQ     '1'
+     C                   READ      FMT3                                   30
+     C                   IF        *IN30 = *ON
+     C                   LEAVE
+     C                   ENDIF
+     C                   EXSR      DETAILS
+     C                   ENDDO
+      *+++++++++++++++++++++++
+
+      * SORT BY CONTRACT AMOUNT
+     C     CAFBTX        WHENEQ    'Y'
+     C                   OPEN      POBOPSUL4
+     C     *LOVAL        SETLL     FMT4
+      *+++++++++++++++++++++++
+     C     '1'           DOWEQ     '1'
+     C                   READ      FMT4                                   30
+     C                   IF        *IN30 = *ON
+     C                   LEAVE
+     C                   ENDIF
+     C                   EXSR      DETAILS
+     C                   ENDDO
+      *+++++++++++++++++++++++
+
+      * SORT BY CREATION DATE
+     C     CAE9TX        WHENEQ    'Y'
+     C                   OPEN      POBOPSUL0
+     C     *LOVAL        SETLL     FMT0
+      *+++++++++++++++++++++++
+     C     '1'           DOWEQ     '1'
+     C                   READ      FMT0                                   30
+     C                   IF        *IN30 = *ON
+     C                   LEAVE
+     C                   ENDIF
+     C                   EXSR      DETAILS
+     C                   ENDDO
+      *+++++++++++++++++++++++
+
+      * SORT BY PO #
+     C     CAPOSO        WHENEQ    'Y'
+     C                   OPEN      POBOPSUL5
+     C     *LOVAL        SETLL     FMT5
+      *+++++++++++++++++++++++
+     C     '1'           DOWEQ     '1'
+     C                   READ      FMT5                                   30
+     C                   IF        *IN30 = *ON
+     C                   LEAVE
+     C                   ENDIF
+     C                   EXSR      DETAILS
+     C                   ENDDO
+      *+++++++++++++++++++++++
+
+     C                   ENDSL
+     C                   ENDSR
+
+      *---------------------------------------------------------------------
+      * PROCESS SELECTED FILE
+     C     DETAILS       BEGSR
+      *---------------------------------------------------------------------
+     C                   EXSR      TOTAL1
+     C                   EXSR      LOADDETLINE
+     C                   EXSR      ACCUMMULATE
+     C                   EXSR      OVERFLOW
+     C                   WRITE     D01
+     C                   ENDSR
+
+      *---------------------------------------------------------------------
+      * CHECK FOR TOTAL BY CONTRACT TYPE
+     C     TOTAL1        BEGSR
+      *---------------------------------------------------------------------
+
+      * FIRST TIME DO NOT BREAK
+     C     #ONCE         IFEQ      ' '
+     C                   EVAL      #ONCE = '1'
+     C                   EVAL      #TYPE = TYPE
+     C                   ENDIF
+
+     C     TYPE          IFNE      #TYPE
+     C                   EVAL      #TYPE = TYPE
+     C                   EXSR      OVERFLOW
+     C                   WRITE     T01
+     C                   CLEAR                   T01
+
+      * FORCE PAGE BREAK ON TOTAL
+     C                   EXSR      HEADLINE
+     C                   ENDIF
+     C                   ENDSR
+
+      *---------------------------------------------------------------------
+      * LOAD DETAIL LINE
+     C     LOADDETLINE   BEGSR
+      *---------------------------------------------------------------------
+
+     C                   CLEAR                   D01
+     C                   MOVEL     TYPE          $TYPE
+     C**                 MOVEL     PODATE        OLDDAT
+     C**                 EXSR      FORMATDAT
+     C**                 MOVEL     NEWDAT        $PODATE
+     C                   MOVEL     PODATE        $PODATE
+     C                   MOVEL     PONUM         $PONUM
+     C                   MOVEL     VNDNAM        $VENDOR
+     C                   MOVEL     CATDES        $CATDES
+     C                   Z-ADD     PORCOM        $PORCOM
+     C                   Z-ADD     ORGAMT        $ORGAMT
+     C                   Z-ADD     CHGAMT        $CHGAMT
+     C                   Z-ADD     REVAMT        $REVAMT
+     C                   Z-ADD     PAIDAM        $PAIDAM
+     C                   Z-ADD     BALAMT        $BALAMT
+     C                   MOVEL     TERDAT        $TERDAT
+     C                   MOVEL     FNDDAT        $FNDDAT
+     C                   MOVEL     LIADAT        $LIADAT
+     C                   Z-ADD     REMAMT        $REMAMT
+     C                   MOVEL     COMPAN        $COMPAN
+     C                   Z-ADD     NEWAMT        $NEWAMT
+     C                   Z-ADD     TOTPMT        $TOTPMT
+      * HEADERS FOR FIRST PAGE OF REPORT
+     C     #ONCE1        IFEQ      ' '
+     C                   MOVE      '1'           #ONCE1
+     C                   EXSR      HEADLINE
+     C                   ENDIF
+     C                   ENDSR
+
+      *---------------------------------------------------------------------
+      * FORMAT PODATE TO YY/MM/DD STYLE
+     C**   FORMATDAT     BEGSR
+      *---------------------------------------------------------------------
+
+     C**                 CLEAR                   YY
+     C**                 CLEAR                   MM
+     C**                 CLEAR                   DD
+     C**                 CLEAR                   NEWDAT
+     C**                 EVAL      YY = %SUBST(OLDDAT:7:2)
+     C**                 EVAL      MM = %SUBST(OLDDAT:1:2)
+     C**                 EVAL      DD = %SUBST(OLDDAT:4:2)
+
+     C**                 EVAL      %SUBST(NEWDAT:1:2) = YY
+     C**                 EVAL      %SUBST(NEWDAT:3:1) = '/'
+     C**                 EVAL      %SUBST(NEWDAT:4:2) = MM
+     C**                 EVAL      %SUBST(NEWDAT:6:1) = '/'
+     C**                 EVAL      %SUBST(NEWDAT:7:2) = DD
+     C**                 ENDSR
+
+      *---------------------------------------------------------------------
+      * ACCUMMULATE TOTALS
+     C     ACCUMMULATE   BEGSR
+      *---------------------------------------------------------------------
+
+     C                   ADD       ORGAMT        $T1ORGAMT
+     C                   ADD       CHGAMT        $T1CHGAMT
+     C                   ADD       REVAMT        $T1REVAMT
+     C                   ADD       PAIDAM        $T1PAIDAM
+     C                   ADD       BALAMT        $T1BALAMT
+     C                   ADD       REMAMT        $T1REMAMT
+     C                   ADD       ORGAMT        $T2ORGAMT
+     C                   ADD       CHGAMT        $T2CHGAMT
+     C                   ADD       REVAMT        $T2REVAMT
+     C                   ADD       PAIDAM        $T2PAIDAM
+     C                   ADD       BALAMT        $T2BALAMT
+     C                   ADD       REMAMT        $T2REMAMT
+     C                   ENDSR
+
+      *---------------------------------------------------------------------
+      * OVERFLOW AND HEADERS
+     C     OVERFLOW      BEGSR
+      *---------------------------------------------------------------------
+
+     C     @PAGE#        IFEQ      *ZERO
+     C     @LINE#        ORGT      @OVER#
+     C*                  Z-ADD     @PAGE#        PAG#
+     C                   EXSR      HEADLINE
+     C                   ENDIF
+     C                   ENDSR
+      *---------------------------------------------------------------------
+      * HEADERS LINE
+     C     HEADLINE      BEGSR
+      *---------------------------------------------------------------------
+
+      * FOR 'BO' OR 'OC' CHANGE HEADINGS TO READ 'JOBS AMOUNT'
+     C                   SELECT
+     C     $TYPE         WHENEQ    'BO'
+     C                   MOVE      *ON           *IN40
+     C     $TYPE         WHENEQ    'BO'
+     C                   MOVE      *ON           *IN40
+     C                   OTHER
+     C                   MOVE      *OFF          *IN40
+     C                   ENDSL
+
+     C                   WRITE     H01
+     C                   WRITE     H02
+     C                   WRITE     H03
+     C                   WRITE     H04
+     C                   WRITE     H05
+     C                   ENDSR
+** CTDATA @CN
+0001-01-01
+

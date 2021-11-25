@@ -1,0 +1,51 @@
+      *=============================================================*
+      *  SFL002DF - CUSTOMER MASTER INQUIRY DISPLAY FILE            *
+      *  (c) Copyright Jonathan E. Yergin, 1991 USA                 *
+      *    & Wayne Madden, 1993 USA                                 *
+      *=============================================================*
+      *
+     A                                      DSPSIZ(24 80 *DS3) PRINT
+     A                                      REF(CUSTPF)
+      *
+     A          R SFLHDR
+->   A                                  1  2'SFL002'
+     A                                  1 29'Customer Master Inquiry'
+     A                                      DSPATR(HI)
+      *
+     A          R SFL                       SFL
+     A            CNAME     R        O  7  5
+     A            CCUST     R        O  7 32EDTCDE(Z)
+     A            CCITY     R        O  7 40
+     A            CSTACD    R        O  7 62
+     A            CZIPCD    R        O  7 68
+->   A                                  8  7'A/R balance:' DSPATR(HI)
+->   A            CARBAL    R        O  8 21EDTCDE(1 $) DSPATR(HI)
+->   A                                  8 37'Credit limit:' DSPATR(HI)
+->   A            CCRLMT    R        O  8 52EDTCDE(1 $) DSPATR(HI)
+      *
+     A          R SFLCTL                    SFLCTL(SFL)
+     A                                      BLINK OVERLAY
+     A                                      CA03 CA12 PAGEDOWN
+     A  40                                  SFLCLR
+     A                                      SFLDSPCTL
+     A  42                                  SFLDSP
+     A  99                                  SFLEND(*MORE)
+->   A N11                                  SFLDROP(CA11)
+->   A  11                                  SFLFOLD(CA11)
+->   A                                      SFLMODE(&SFMODE)
+->   A                                      SFLSIZ(15) SFLPAG(7)
+     A  60                                  SFLMSG('Roll up or down beyond fir-
+     A                                      st or last record in subfile.' 60)
+     A            SFLPS          4S 0H      SFLRCDNBR
+->   A            SFMODE         1A  H
+     A                                  4 30'Position to customer . .'
+     A            SEARCH        25A  I  4 55CHECK(LC)
+     A                                  6  5'Customer Name              Numb-
+     A                                      er  City                 State  Zip'
+     A                                      DSPATR(HI)
+      *
+     A          R SFLCMD
+     A                                      OVERLAY
+     A                                 23  2'F3=Exit' COLOR(BLU)
+->   A                                 23 14'F11=Expand/Truncate' COLOR(BLU)
+->   A                                 23 38'F12=Cancel' COLOR(BLU)

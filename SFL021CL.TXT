@@ -1,0 +1,46 @@
+/*********************************************************************/
+/*    Program Name:  SFL021CL                                        */
+/*    Description:  CUSTOMER MASTER INQUIRY                          */
+/*                                                                   */
+/*    (c) Copyright Jonathan E. Yergin, 1991 USA                     */
+/*        & Wayne Madden, 1993 USA                                   */
+/*********************************************************************/
+
+  PGM
+
+  DCL  &fkey      *CHAR      1
+  DCL  &@f03      *CHAR      1  VALUE(x'33')
+  DCL  &@f12      *CHAR      1  VALUE(x'3C')
+
+  DCLF SFL021PM
+
+/*  Create edit file with 1 record and no increments.                */
+  CRTPF      FILE(QTEMP/UEDIT40)                                    +
+             RCDLEN(40)                                             +
+             SIZE(1 0 0)                                            +
+             TEXT('Definition File for Edit Operations')
+  MONMSG MSGID(CPF7302) /* File not created; already exists. */
+
+/*  Initialize the 1 record.                                         */
+  INZPFM     FILE(UEDIT40)
+  MONMSG MSGID(CPF3100) /* Monitor CPF31xx messages. */
+
+  CHGVAR &CUSTR VALUE(0)
+
+/*  Display prompt.                                                  */
+
+DISPLAY:
+  SNDRCVF
+
+/* Check function key pressed on prompt screen                       */
+  IF (&IN03 *OR &IN12) GOTO FINISH
+
+  CALL SFL021 PARM(&scmod &custr &fkey)
+
+/* Check function key pressed in RPG program, if any                 */
+  IF (&fkey = &@f03) GOTO FINISH
+  GOTO DISPLAY
+
+FINISH:
+  RCLRSC
+  ENDPGM

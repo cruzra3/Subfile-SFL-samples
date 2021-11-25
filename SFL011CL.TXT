@@ -1,0 +1,16 @@
+/*********************************************************************/
+/*    Program Name:  SFL011CL                                        */
+/*    Description:   Customer Contact Update example                 */
+/*                                                                   */
+/*    (c) Copyright Jonathan E. Yergin, 1991 USA                     */
+/*        & Wayne Madden, 1993 USA                                   */
+/*********************************************************************/
+
+  PGM
+
+  CALL SFL011
+
+  RCLRSC
+
+FINISH:
+  ENDPGM

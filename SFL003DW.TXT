@@ -1,0 +1,59 @@
+      *=============================================================*
+      *  SFL003DW - CUSTOMER MASTER SELECT DISPLAY FILE             *
+      *     WINDOW VERSION (uses DDS WINDOW keyword)                *
+      *                                                             *
+      *  (c) Wayne Madden, 1993 USA                                 *
+      *                                                             *
+      *  (Changes from SFL003DF are marked)                         *
+      *=============================================================*
+      *
+     A                                      DSPSIZ(24 80 *DS3) PRINT
+     A                                      REF(CUSTPF)
+      *
+     A          R SFLHDR
+->   A                                      WINDOW(SFLCTL)
+->   A                                  1  2'SFL003W'
+->   A                                  1 20'Customer Master Select'
+     A                                      DSPATR(HI)
+      *
+     A          R SFL                       SFL
+->   A            SELIO          1S 0I  7  2VALUES(0 1)
+->   A            CCUST     R        H
+->   A            CNAME     R        O  7  5
+->   A            CCITY     R        O  7 36
+->   A            CSTACD    R        O  7 57
+      *
+     A          R SFLCTL                    SFLCTL(SFL)
+->   A                                      WINDOW(3 14 19 59)
+     A                                      BLINK OVERLAY
+     A                                      CA03 CA12 PAGEDOWN
+     A  40                                  SFLCLR
+     A                                      SFLDSPCTL
+     A  42                                  SFLDSP
+     A  99                                  SFLEND(*MORE)
+->   A                                      SFLSIZ(11) SFLPAG(10)
+     A  60                                  SFLMSG('Roll up or down beyond fir-
+     A                                      st or last record in subfile.' 60)
+     A            SFLPS          4S 0H      SFLRCDNBR
+     A                                  3  1'Type options, press Enter.'
+     A                                      COLOR(BLU)
+     A                                  4  3'1=Select' COLOR(BLU)
+     A                                  4 14'Position to customer . .'
+     A            SEARCH        20A  I  4 39CHECK(LC)
+->   A                                  6  1'Sel' DSPATR(HI)
+->   A                                  6  5'Customer'
+->   A                                      DSPATR(HI)
+->   A                                  6 36'City'
+->   A                                      DSPATR(HI)
+->   A                                  6 57'St'
+->   A                                      DSPATR(HI)
+      *
+     A          R SFLCMD
+->   A                                      WINDOW(SFLCTL)
+     A                                      OVERLAY
+     A                                 18  2'F3=Exit' COLOR(BLU)
+     A                                 18 14'F12=Cancel' COLOR(BLU)
+      *
+     A          R DUMMY
+     A                                      ASSUME
+     A                                  1  3' '

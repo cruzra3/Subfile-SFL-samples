@@ -1,0 +1,76 @@
+      *==============================================================*
+      * SFL003R2 - Customer Master Select Subprogram (DSPF sharing)  *
+      *            (c) Copyright Jonathan E. Yergin, 1991 USA        *
+      *              &  Wayne Madden, 1993 USA                       *
+      *==============================================================*
+      *
+     FSFL003DFCF  E                    WORKSTN
+     F                                        SFLRN KSFILE SFL
+     F            SFLHDR                            KIGNORE
+     F            SFLCMD                            KIGNORE
+      *
+      * Standard include for all interactive programs
+      *   Defines standard constants
+     I              '0'                   C         @FALSE
+     I              '1'                   C         @TRUE
+      *
+      *==============================================================*
+      * Input/Output Parameter List                                  *
+      *    I#CUST - Input customer number  (unused as input)         *
+      *    O#CUST - Output customer number (customer selection)      *
+      *==============================================================*
+      *
+     C           *ENTRY    PLIST
+     C                     PARM O#CUST    I#CUST
+      *
+      *==============================================================*
+      * This code never executes, just prevents compile errors       *
+      *==============================================================*
+      *
+     C           *IN99     IFEQ *ON
+      *  Reference file for I/O.
+     C                     EXFMTSFLCTL
+     C                     MOVE *OFF      *IN99
+     C                     ENDIF
+      *
+      *==============================================================*
+      * Read changed records from subfile                            *
+      *==============================================================*
+      *
+      * Reset values from last call
+     C                     RESETI#CUST
+     C                     RESETO#CUST
+      *
+      * Read changed records
+     C                     READCSFL                      98
+      *
+     C           *IN98     DOWEQ*OFF
+      *
+      * If user made selection,
+      *   initialize output variable with user selection
+      *   and force end of program.
+     C           SELIO     IFEQ 1
+     C                     Z-ADDCCUST     O#CUST
+     C                     LEAVE
+     C                     ENDIF
+      *
+     C                     READCSFL                      98
+     C                     ENDDO
+      *
+      * End Program
+     C                     RETRN
+      *
+      *==============================================================*
+      * Initialization Subroutine                                    *
+      *==============================================================*
+      *
+     C           *INZSR    BEGSR
+      *
+     C           *LIKE     DEFN CCUST     I#CUST
+     C           *LIKE     DEFN CCUST     O#CUST
+      *
+     C                     CLEARI#CUST
+     C                     CLEARO#CUST
+     C                     Z-ADD0         SFLRN   40
+      *
+     C                     ENDSR

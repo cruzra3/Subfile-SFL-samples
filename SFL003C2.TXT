@@ -1,0 +1,28 @@
+/*********************************************************************/
+/*    Program Name:  SFL003C2                                        */
+/*    Description:  CUSTOMER MASTER SEARCH WITH SUBFFILE SHARING     */
+/*                                                                   */
+/*    (c) Copyright Jonathan E. Yergin, 1991 USA                     */
+/*        & Wayne Madden, 1993 USA                                   */
+/*********************************************************************/
+
+  PGM
+
+  DCL  &custn     *DEC       5 0
+  DCL  &custc     *CHAR      5
+  DCL  &fkey      *CHAR      1
+
+  OVRDSPF SFL003DF SHARE(*YES)
+  CALL SFL003R1 PARM(&custn &fkey)
+
+  CHGVAR &custc &custn
+
+  SNDPGMMSG  MSGID(CPF9898)                                         +
+             MSGF(QCPFMSG)                                          +
+             MSGDTA('Customer number' |> &custc |> 'was selected')  +
+             MSGTYPE(*ESCAPE)
+
+  RCLRSC
+
+FINISH:
+  ENDPGM

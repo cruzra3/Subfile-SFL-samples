@@ -1,0 +1,16 @@
+/*********************************************************************/
+/*    Program Name:  SFL015CL                                        */
+/*    Description:   Side by Side Subfile Example                    */
+/*                                                                   */
+/*    (c) Copyright Jonathan E. Yergin, 1991 USA                     */
+/*        & Wayne Madden, 1993 USA                                   */
+/*********************************************************************/
+
+  PGM
+
+  CALL SFL015
+
+  RCLRSC
+
+FINISH:
+  ENDPGM

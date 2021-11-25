@@ -1,0 +1,8 @@
+      *   ITEMPF - Item Master file
+     A                                      UNIQUE
+     A          R ITEM                      TEXT('Item Master Record')
+     A            IVEND     R     P         REFFLD(VVEND VENDPF)
+     A            IITEM          7P 0       TEXT('Item Number')
+     A            IDESC         25A         TEXT('Description')
+     A          K IVEND
+     A          K IITEM

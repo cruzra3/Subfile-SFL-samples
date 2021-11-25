@@ -1,0 +1,12 @@
+      *
+      *  NRQSFLDF - SUBFILE FOR NON-RECURSIVE QUICK SORT ROUTINE
+      *  (c) Copyright Jonathan E. Yergin, 1991 USA
+      *
+     A                                      INDARA
+      *
+     A          R SORTSFL                   SFL
+     A            DATA          80A  B  3  2
+      *
+     A          R SORTCTL                   SFLCTL(SORTSFL)
+     A N98                                  SFLDSP
+     A                                      SFLSIZ(2) SFLPAG(1)

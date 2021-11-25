@@ -1,0 +1,62 @@
+      *==============================================================*
+      *  SFL021DF - MULTIPLE PAGE ALTERNATE VIEW DISPLAY FILE        *
+      *  (c) Copyright Jonathan E. Yergin, 1991 USA                  *
+      *    & Wayne Madden, 1993 USA                                  *
+      *==============================================================*
+      *
+     A                                      DSPSIZ(24 80 *DS3)
+     A                                      PRINT
+     A                                      REF(CUSTPF)
+      *
+     A          R SFLHDR
+     A                                  1  2'SFL021'
+     A                                  1 31'Customer Master'
+     A                                      DSPATR(HI)
+     A            DSPMOD         8A  O  1 47TEXT('Display Mode')
+     A                                      DSPATR(HI)
+      *
+     A          R SFL                       SFL
+     A            SELIO          1S 0I  7  2VALUES(0 1)
+     A  05                                  DSPATR(UL)
+     A N05                                  DSPATR(PR)
+     A            CNAME     R        O  7  5
+     A            CCUST     R        O  7 32EDTCDE(Z)
+     A            SVIEWC        40   O  7 40
+     A            SVIEW1        40   H
+     A            SVIEW2        40   H
+     A            SVIEW3        40   H
+     A*
+     A          R SFLCTL                    SFLCTL(SFL)
+     A                                      SFLSIZ(16) SFLPAG(15)
+     A                                      CA03 CA11 CA12
+     A N99                                  PAGEDOWN
+     A                                      BLINK OVERLAY
+     A  42                                  SFLDSP
+     A                                      SFLDSPCTL
+     A  40                                  SFLCLR
+     A  99                                  SFLEND(*MORE)
+     A  60                                  SFLMSG('Roll up or down beyond fir-
+     A                                      st or last record in subfile.' 60)
+     A            SFLPS          4S 0H      SFLRCDNBR
+     A                                  3  1'Type options, press Enter.'
+     A                                      COLOR(BLU)
+     A  05                              4  3'1=Select' COLOR(BLU)
+     A                                  4 30'Position to customer . .'
+     A            SEARCH        25A  I  4 55CHECK(LC)
+     A                                  6  1'Sel' DSPATR(HI)
+     A                                  6  5'Customer Name              Number'
+     A                                      DSPATR(HI)
+     A  11                              6 40'City                 State  Zip'
+     A                                      DSPATR(HI)
+     A  12                              6 40'Contact              Phone'
+     A                                      DSPATR(HI)
+     A  13                              6 40'    Current Balance      Credit Li-
+     A                                      mit' DSPATR(HI)
+     A*
+     A          R SFLCMD
+     A                                      OVERLAY
+     A                                 23  2'F3=Exit' COLOR(BLU)
+     A  11                             23 14'F11=View 2' COLOR(BLU)
+     A  12                             23 14'F11=View 3' COLOR(BLU)
+     A  13                             23 14'F11=View 1' COLOR(BLU)
+     A                                 23 29'F12=Cancel' COLOR(BLU)

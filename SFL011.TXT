@@ -1,0 +1,421 @@
+      *==============================================================*
+      *  SFL011 - CUSTOMER CONTACT UPDATE                            *
+      *  (c) Copyright Jonathan E. Yergin, 1991 USA                  *
+      *     @ Wayne Madden, 1993 USA                                 *
+      *==============================================================*
+      *
+     FCUSTLF  IF  E           K        DISK
+     FSFL011DFCF  E                    WORKSTN      KINFDS WSDS
+     F                                        SFLRN KSFILE SFL
+      *
+      * Standard include for all interactive programs
+      *   named hexadecimal constants for function keys
+     I              X'31'                 C         @F01
+     I              X'32'                 C         @F02
+     I              X'33'                 C         @F03
+     I              X'34'                 C         @F04
+     I              X'35'                 C         @F05
+     I              X'36'                 C         @F06
+     I              X'37'                 C         @F07
+     I              X'38'                 C         @F08
+     I              X'39'                 C         @F09
+     I              X'3A'                 C         @F10
+     I              X'3B'                 C         @F11
+     I              X'3C'                 C         @F12
+     I              X'B1'                 C         @F13
+     I              X'B2'                 C         @F14
+     I              X'B3'                 C         @F15
+     I              X'B4'                 C         @F16
+     I              X'B5'                 C         @F17
+     I              X'B6'                 C         @F18
+     I              X'B7'                 C         @F19
+     I              X'B8'                 C         @F20
+     I              X'B9'                 C         @F21
+     I              X'BA'                 C         @F22
+     I              X'BB'                 C         @F23
+     I              X'BC'                 C         @F24
+     I              X'BD'                 C         @CLEAR
+     I              X'F1'                 C         @ENTER
+     I              X'F3'                 C         @HELP
+     I              X'F4'                 C         @PAGUP
+     I              X'F5'                 C         @PAGDN
+     I              X'F6'                 C         @PRINT
+      *
+      * Standard include for all interactive programs
+      *   Defines standard constants
+     I              '0'                   C         @FALSE
+     I              '1'                   C         @TRUE
+     I*
+     I* Program constants
+     I              ' '                   C         @BLANK                 Blank
+     I              0                     C         @NULL                  Null
+     I              '*ALL'                C         @ALL                   All
+     I              '*DIAG'               C         @DIAG                  Diag
+     I              '*ESCAPE'             C         @ESCAP                 Escap
+     I              0                     C         @CUSTK                 Curr
+     I              1                     C         @PRSTK                 Prev
+     I              '*'                   C         @CUQUE                 Curr
+     I*
+     I* Program status data structure
+     I           SDS
+     I                                        1  10 @PGM                   _ERR_
+     I                                       11  150@STAT                  _ERR_
+     I                                       37  390@PARMS                 _ERR_
+     I                                       40  46 @MSGID                 _ERR_
+     I                                       91 169 @DATA                  _ERR_
+     I                                      244 253 @JOBNA                 _ERR_
+     I                                      254 263 @USRNA                 _ERR_
+     I                                      264 269 @JOBNO                 _ERR_
+     I                                      304 313 @SRCF                  _ERR_
+     I                                      314 323 @SRCL                  _ERR_
+     I                                      324 333 @SRCM                  _ERR_
+     I*
+     I* Message-related fields
+     I            DS
+     I I            ' '                       1   7 MSGID                  messa
+     I I            'QCPFMSG   QSYS      '    8  27 MSGF                   messa
+     I I            ' '                      28 106 MSGTXT                 messa
+     I I            79                    B 107 1100MSGLEN                 messa
+     I I            ' '                     111 120 MSGTYP                 messa
+     I I            '*'                     121 130 MSGQ                   messa
+     I I            0                     B 131 1340MSGSTK                 messa
+     I I            ' '                     135 138 MSGKEY                 messa
+     I I            X'0000000000000000'     149 156 MSGERR                 messa
+     I I            1                     B 157 1600MSGNTY                 messa
+     I I            '*'                     161 170 MSGPQ                  messa
+     I I            ' '                     171 180 MSGRMV                 messa
+     I I            0                       181 1900MSGCNT                 messa
+      *
+      * Customer externally defined DS
+     ICUSTDS    E DSCUSTPF
+      *
+     I            DS
+     I                                        1  110SPHONE
+     I                                        1   10SPHON1
+     I                                        2   40SPHON2
+     I                                        5   70SPHON3
+     I                                        8  110SPHON4
+      *
+      * Standard include for all interactive programs
+      *   display file information data structure
+     IWSDS        DS
+      *               Identifies the key pressed
+     I                                      369 369 KEY
+      *               Identifies the subfile page rrn
+     I                                    B 378 3790PAGRRN
+      *
+      *==============================================================*
+      * Reset variables and clear subfile                            *
+      *   in case program called again after *INLR = *OFF            *
+      *   ensures that program starts again properly                 *
+      *==============================================================*
+      *
+     C                     RESET@EXIT
+     C                     EXSR @RESET
+      *
+      *==============================================================*
+      * Program mainline                                             *
+      *==============================================================*
+      *
+     C                     EXSR @LOAD
+      *
+      * Perform until exit requested using F03 or F12
+     C           @EXIT     DOUEQ@TRUE
+      *
+     C                     WRITESFLHDR
+     C                     WRITESFLCMD
+     C                     WRITEMSGCTL                      Write MSGCTL
+     C                     EXFMTSFLCTL
+      *
+     C                     Z-ADDPAGRRN    SFLPS
+      *
+      * Process response
+     C           KEY       CASEQ@F03      @F03SR            F03 exit
+     C           KEY       CASEQ@F12      @F12SR            F12 cancel
+     C           KEY       CASEQ@PAGDN    @PGDN             Page down
+     C                     CAS            @ENTKY            Enter
+     C                     ENDCS
+      *
+     C                     ENDDO
+      *
+      * End of program, you can modify to leave *INLR = *OFF
+      *   and program will still work properly when called again
+      *
+     C                     MOVE *ON       *INLR
+     C                     RETRN
+      *
+      *==============================================================*
+      * Subroutine Section of Program                                *
+      *==============================================================*
+      *
+      *==============================================================*
+      * Initialization Subroutine                                    *
+      *==============================================================*
+      *
+     C           *INZSR    BEGSR
+      *
+     C           *LIKE     DEFN CNAME     ENDNAM
+     C           *LIKE     DEFN CCUST     ENDCUS
+     C           *LIKE     DEFN @PGM      EDTPGM
+     C           *LIKE     DEFN @PGM      UPDPGM
+      *
+      * Create program exit flag and set value to @FALSE
+     C                     MOVE @FALSE    @EXIT   1
+      * Create error flag and set value to @FALSE
+     C                     MOVE @FALSE    @ERR    1
+      *
+      * Miscellaneous subfile program variables
+     C                     Z-ADD0         SFLRN   40
+     C                     Z-ADD0         ENDRN   40
+     C                     Z-ADD0         ERRRN   40
+     C                     Z-ADD1         SFLPS
+     C                     MOVE @PGM      PGMQ
+     C                     MOVE 'CUSEDT'  EDTPGM
+     C                     MOVE 'CUSUPD'  UPDPGM
+      *
+      * Complete file key
+     C           FILKEY    KLIST
+     C                     KFLD           CNAME
+     C                     KFLD           CCUST
+      *
+      * End key for repositioning subfile
+     C           ENDKEY    KLIST
+     C                     KFLD           ENDNAM
+     C                     KFLD           ENDCUS
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      * Load subfile                                                 *
+      *==============================================================*
+      *
+     C           @LOAD     BEGSR
+      *
+      * Read a page of records or until EOF.
+     C                     DO   8
+     C                     READ CUSTLF                   99
+      *
+     C           *IN99     IFEQ *ON
+     C                     LEAVE
+     C                     ELSE
+      * Write subfile record.
+     C                     Z-ADDCPHONE    SPHONE
+     C                     ADD  1         SFLRN
+     C                     WRITESFL
+     C                     ENDIF
+      *
+     C                     ENDDO
+      *
+      * Set endkey values
+     C                     EXSR @ENDKY
+      *
+      * If not EOF, read one more record to make sure.
+     C           *IN99     IFEQ *OFF
+     C                     READ CUSTLF                   99
+     C                     ENDIF
+      *
+      * If no records were added to subfile, set error indicators.
+     C           SFLRN     IFEQ *ZEROS
+     C                     MOVE *OFF      *IN42
+     C                     ELSE
+      * Else, set indicators to display subfile.
+     C                     MOVE *ON       *IN42
+      * Set subfile position to page just added.
+     C                     Z-ADDSFLRN     SFLPS
+     C                     ENDIF
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      * Update end keys and variables for file/subfile               *
+      *==============================================================*
+      *
+     C           @ENDKY    BEGSR
+      *
+     C                     MOVE CNAME     ENDNAM
+     C                     Z-ADDCCUST     ENDCUS
+     C                     Z-ADDSFLRN     ENDRN
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      * Clear subfile                                                *
+      *==============================================================*
+      *
+     C           @RESET    BEGSR
+      *
+      * Clear subfile and reset subfile display indicator.
+     C                     MOVE *ON       *IN40
+     C                     WRITESFLCTL
+     C                     MOVE *OFF      *IN40
+     C                     MOVE *OFF      *IN42
+      *
+      * Reset subfile record number and subfile position fields.
+     C                     RESETSFLRN
+     C                     RESETENDRN
+     C                     RESETERRRN
+     C                     RESETSFLPS
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      * Reposition file                                              *
+      *==============================================================*
+      *
+     C           @REPOS    BEGSR
+      *
+      * Clear subfile
+     C                     EXSR @RESET
+      *
+      * Reposition file by search value
+     C           CNAME     SETLLCUSTLF
+     C                     EXSR @LOAD
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      * Subfile page down                                            *
+      *==============================================================*
+      *
+     C           @PGDN     BEGSR
+      *
+     C           *IN99     IFEQ *OFF
+      * Continue with record after the last one read.
+     C           ENDKEY    SETGTCUSTLF
+     C                     Z-ADDENDRN     SFLRN
+     C                     EXSR @LOAD
+      * Page down beyond end of subfile
+     C                     ELSE
+     C                     MOVE *ON       *IN60
+     C                     ENDIF
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      * Process enter key after subfile display                      *
+      *==============================================================*
+      *
+     C           @ENTKY    BEGSR
+      *
+      * User request position to new name
+     C           SEARCH    IFNE *BLANKS
+     C                     MOVELSEARCH    CNAME
+     C                     EXSR @REPOS
+      * or process subfile changed records
+     C                     ELSE
+     C                     EXSR @SFLRD
+     C                     ENDIF
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      * Read changed records in subfile to check for selection       *
+      *==============================================================*
+      *
+     C           @SFLRD    BEGSR
+      *
+      * Remove previous error messages, reset error RRN
+     C                     EXSR @RMVMS
+     C                     RESETERRRN
+      *
+      * Did user make a selection?
+     C                     READCSFL                      98
+      *
+     C           *IN98     DOWEQ*OFF
+      *
+      * Call the external edit program for each change
+     C                     Z-ADDSPHONE    CPHONE
+     C                     EXSR @CEDIT
+      *
+      * No error, then update customer record
+     C           @ERR      IFEQ @FALSE
+     C                     EXSR @CUPDT
+     C                     ELSE
+      * Save RRN of first subfile record with error (just first one)
+     C           ERRRN     IFEQ 0
+     C                     Z-ADDSFLRN     ERRRN
+     C                     ENDIF
+      * Set indicator for SFLNXTCHG
+     C                     MOVE *ON       *IN08
+     C                     ENDIF
+      *
+      * Update subfile record
+     C                     UPDATSFL
+     C                     MOVE *OFF      *IN08
+      *
+     C                     READCSFL                      98
+     C                     ENDDO
+      *
+     C           ERRRN     IFNE 0
+     C                     Z-ADDERRRN     SFLPS
+     C                     ENDIF
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      *  Call external program to edit Customer Master record.       *
+      *==============================================================*
+     C           @CEDIT    BEGSR
+      *
+     C                     RESET@ERR
+      *
+     C                     CALL EDTPGM
+     C                     PARM           CUSTDS
+     C                     PARM           RTNIND 11
+     C                     PARM           @ERR
+      *
+     C                     MOVEARTNIND    *IN,71
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      *  Call external program to update Customer Master.            *
+      *==============================================================*
+     C           @CUPDT    BEGSR
+      *
+     C                     CALL UPDPGM
+     C                     PARM           CUSTDS
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      * Remove program messages.
+      *==============================================================*
+      *
+     C           @RMVMS    BEGSR
+      *
+     C                     MOVEL@CUQUE    MSGQ      P       set queue
+     C                     MOVEL@CUSTK    MSGSTK    P       set stack
+     C                     MOVEL@ALL      MSGRMV    P       remove *ALL
+     C                     MOVE *BLANKS   MSGKEY            set msg key
+      *
+     C                     CALL 'QMHRMVPM'                  Call 'remove pgm msg
+     C                     PARM           MSGQ              message_queue
+     C                     PARM           MSGSTK            message_stack
+     C                     PARM           MSGKEY            message_key
+     C                     PARM           MSGRMV            messages_to_remove
+     C                     PARM           MSGERR            message_error
+     C                     Z-ADD0         MSGCNT            message count = 0
+     C                     ENDSR
+      *
+      *==============================================================*
+      * F03 key subroutine                                           *
+      *==============================================================*
+      *
+     C           @F03SR    BEGSR
+      *
+      * set exit program flag
+     C                     MOVE @TRUE     @EXIT
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      * F12 key subroutine                                           *
+      *==============================================================*
+      *
+     C           @F12SR    BEGSR
+      *
+      * set exit program flag
+     C                     MOVE @TRUE     @EXIT
+      *
+     C                     ENDSR

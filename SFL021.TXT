@@ -1,0 +1,419 @@
+      *==============================================================*
+      *  MULTIPLE PAGE ALTERNATE VIEW (CUSTOMER MASTER SELECT)       *
+      *  (c) Copyright Jonathan E. Yergin, 1991 USA                  *
+      *    & Wayne Madden, 1993 USA                                  *
+      *==============================================================*
+      *
+     FCUSTLF  IF  E           K        DISK
+     FUEDIT40 UF  F      40            DISK
+     FSFL021DFCF  E                    WORKSTN      KINFDS WSDS
+     F                                        SFLRN KSFILE SFL
+      *
+     E                    LIT     1   2  8               Display literals
+     E                    VIEW        3 40               Alternate views
+      *
+     IUEDIT40 NS  01
+     I                                        1  40 UEDITI
+      *
+      * Standard include for all interactive programs
+      *   named hexadecimal constants for function keys
+     I              X'31'                 C         @F01
+     I              X'32'                 C         @F02
+     I              X'33'                 C         @F03
+     I              X'34'                 C         @F04
+     I              X'35'                 C         @F05
+     I              X'36'                 C         @F06
+     I              X'37'                 C         @F07
+     I              X'38'                 C         @F08
+     I              X'39'                 C         @F09
+     I              X'3A'                 C         @F10
+     I              X'3B'                 C         @F11
+     I              X'3C'                 C         @F12
+     I              X'B1'                 C         @F13
+     I              X'B2'                 C         @F14
+     I              X'B3'                 C         @F15
+     I              X'B4'                 C         @F16
+     I              X'B5'                 C         @F17
+     I              X'B6'                 C         @F18
+     I              X'B7'                 C         @F19
+     I              X'B8'                 C         @F20
+     I              X'B9'                 C         @F21
+     I              X'BA'                 C         @F22
+     I              X'BB'                 C         @F23
+     I              X'BC'                 C         @F24
+     I              X'BD'                 C         @CLEAR
+     I              X'F1'                 C         @ENTER
+     I              X'F3'                 C         @HELP
+     I              X'F4'                 C         @PAGUP
+     I              X'F5'                 C         @PAGDN
+     I              X'F6'                 C         @PRINT
+      *
+      * Standard include for all interactive programs
+      *   Defines standard constants
+     I              '0'                   C         @FALSE
+     I              '1'                   C         @TRUE
+      *
+      * externally described data structure for records
+     ILINEDS    E DSCUSTPF                   16
+      *
+      * Standard include for all interactive programs
+      *   display file information data structure
+     IWSDS        DS
+      *               Identifies the key pressed
+     I                                      369 369 KEY
+      *               Identifies the subfile page rrn
+     I                                    B 378 3790PAGRRN
+     I                                    B 380 3810NBRRCD
+      *
+      *  Redefine three View fields as an array.
+     I            DS
+     I                                        1  40 SVIEW1
+     I                                       41  80 SVIEW2
+     I                                       81 120 SVIEW3
+     I                                        1 120 VIEW
+      *
+      *==============================================================*
+      *  Program entry parameter list.                               *
+      *==============================================================*
+      *
+     C           *ENTRY    PLIST
+     C                     PARM           I#MODE
+     C                     PARM O#CUST    I#CUST
+     C                     PARM O#KEY     I#KEY
+      *
+     C                     MOVE I#MODE    SCNMOD
+      *
+      *  Display.
+     C           SCNMOD    IFEQ 'D'
+     C                     MOVE LIT,1     DSPMOD
+     C                     MOVE *OFF      *IN05
+     C                     ELSE
+      *  Display/Select.
+     C           SCNMOD    IFEQ 'S'
+     C                     MOVE LIT,2     DSPMOD
+     C                     MOVE *ON       *IN05
+     C                     ENDIF
+     C                     ENDIF
+      *
+      *==============================================================*
+      * Reset variables and clear subfile                            *
+      *   in case program called again after *INLR = *OFF            *
+      *   ensures that program starts again properly                 *
+      *==============================================================*
+      *
+     C                     CLEARENDNAM
+     C                     CLEARENDCUS
+     C                     RESET@EXIT
+      *
+      *==============================================================*
+      * Program mainline                                             *
+      *==============================================================*
+      *
+     C                     EXSR @LOAD
+      *
+      * Perform until exit requested using F03 or F12
+     C           @EXIT     DOUEQ@TRUE
+      *
+     C                     WRITESFLHDR
+     C                     WRITESFLCMD
+     C                     EXFMTSFLCTL
+      *
+     C                     Z-ADDPAGRRN    SFLPS
+      * Process response
+     C           KEY       CASEQ@F03      @F03SR            F03 exit
+     C           KEY       CASEQ@F11      @F11SR            F11 View
+     C           KEY       CASEQ@F12      @F12SR            F12 cancel
+     C           KEY       CASEQ@PAGDN    @PGDN             Page down
+     C                     CAS            @ENTKY            Enter
+     C                     ENDCS
+      *
+     C                     ENDDO
+      *
+      * End of program, you can modify to leave *INLR = *OFF
+      *   and program will still work properly when called again
+      *
+     C                     MOVE *ON       *INLR
+     C                     RETRN
+      *
+      *==============================================================*
+      * Subroutine Section of Program                                *
+      *==============================================================*
+      *
+      *==============================================================*
+      * Initialization Subroutine                                    *
+      *==============================================================*
+      *
+     C           *INZSR    BEGSR
+      *
+     C                     MOVE *BLANK    SCNMOD  1
+     C                     Z-ADD0         SFLRN   40
+     C                     Z-ADD1         SFLPS
+     C           *LIKE     DEFN SCNMOD    I#MODE
+     C           *LIKE     DEFN CNAME     ENDNAM
+     C           *LIKE     DEFN CCUST     ENDCUS
+     C           *LIKE     DEFN CCUST     I#CUST
+     C           *LIKE     DEFN CCUST     O#CUST
+     C           *LIKE     DEFN SFLRN     SFLRRN
+     C           *LIKE     DEFN KEY       I#KEY
+     C           *LIKE     DEFN KEY       O#KEY
+      *
+      * Create program exit flag and set value to @FALSE
+     C                     MOVE @FALSE    @EXIT   1
+      *
+      * Miscellaneous subfile program variables
+     C                     MOVE *BLANKS   BLANKS 40
+     C                     MOVE *ZEROS    V       10
+     C                     MOVE *ZEROS    X       10
+     C                     MOVE *ZEROS    IN      20
+      *
+      *  If screen mode is blank, default to Display mode.
+     C           SCNMOD    IFEQ *BLANKS
+     C                     MOVE 'D'       SCNMOD
+     C                     ENDIF
+      *
+      *  Set up View 1.
+     C                     MOVE 1         V
+     C                     MOVE *ON       *IN11
+     C                     MOVE *OFF      *IN12
+     C                     MOVE *OFF      *IN13
+      *
+      *  Initialize SEARCH field, end key fields, and return parm.
+     C                     MOVE *BLANKS   ENDNAM
+     C                     Z-ADD0         ENDCUS
+      *
+      * End key for repositioning subfile
+     C           ENDKEY    KLIST
+     C                     KFLD           ENDNAM
+     C                     KFLD           ENDCUS
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      * Load subfile records into MODS                               *
+      *==============================================================*
+      *
+     C           @LOAD     BEGSR
+      *
+     C                     CLEARSELIO
+      *
+     C                     DO   15
+     C                     READ CUSTR                    99
+      *
+     C           *IN99     IFEQ *ON
+     C                     LEAVE
+     C                     ELSE
+      *    Create alternate views.
+     C           1         CHAINUEDIT40              21
+     C                     DO   3         X
+      *      Set view indicators.
+     C           X         ADD  20        IN
+     C                     MOVEA'000'     *IN,21
+     C                     MOVE '1'       *IN,IN
+      *      Put/get record with fields edited.
+     C                     EXCPTUEDITO
+     C           1         CHAINUEDIT40              21
+     C                     MOVE UEDITI    VIEW,X
+     C                     ENDDO
+      *
+      *    Write subfile record.
+     C                     ADD  1         SFLRN
+     C                     WRITESFL
+     C                     ENDIF
+      *
+     C                     ENDDO
+      *
+      *  Save endkey values
+     C                     EXSR @ENDKY
+      *
+      *  If no records were added to subfile, set error indicators.
+     C           SFLRN     IFEQ *ZEROS
+     C                     MOVE *OFF      *IN42
+     C                     ELSE
+      *  Else, set indicators to display subfile.
+     C                     MOVE *ON       *IN42
+      *  Set subfile position to page just added, and ...
+     C                     Z-ADDSFLRN     SFLPS
+     C                     EXSR @RBDSF
+     C                     ENDIF
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      *  Rebuild subfile                                             *
+      *==============================================================*
+      *
+     C           @RBDSF    BEGSR
+      *
+      * Rebuild subfile from MODS
+     C                     DO   NBRRCD    SFLRN
+     C           SFLRN     CHAINSFL                  21
+     C                     CLEARSELIO
+     C                     MOVE VIEW,V    SVIEWC
+     C                     UPDATSFL
+     C                     ENDDO
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      * Update end keys and variables for file/subfile               *
+      *==============================================================*
+      *
+     C           @ENDKY    BEGSR
+      *
+     C                     MOVE CNAME     ENDNAM
+     C                     Z-ADDCCUST     ENDCUS
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      * Clear subfile (one or two subfiles)                          *
+      *==============================================================*
+      *
+     C           @RESET    BEGSR
+      *
+      * Clear subfile and reset subfile display indicator.
+     C                     MOVE *ON       *IN40
+     C                     WRITESFLCTL
+     C                     MOVE *OFF      *IN40
+     C                     MOVE *OFF      *IN42
+      *
+      * Reset subfile record number and subfile position fields.
+     C                     RESETSFLRN
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      * Reposition file                                              *
+      *==============================================================*
+      *
+     C           @REPOS    BEGSR
+      *
+     C                     EXSR @RESET
+      *
+      * Reposition file by search value
+     C           CNAME     SETLLCUSTLF
+     C                     EXSR @LOAD
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      * Subfile page down                                            *
+      *==============================================================*
+      *
+     C           @PGDN     BEGSR
+      *
+     C           *IN99     IFEQ *OFF
+      * Continue with record after the last one read.
+     C           ENDKEY    SETGTCUSTLF
+     C                     EXSR @LOAD
+      * Page down beyond end of subfile
+     C                     ELSE
+     C                     MOVE *ON       *IN60
+     C                     ENDIF
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      * Process enter key after subfile display                      *
+      *==============================================================*
+      *
+     C           @ENTKY    BEGSR
+      *
+      * User request position to new name
+     C           SEARCH    IFNE *BLANKS
+     C                     MOVELSEARCH    CNAME
+     C                     EXSR @REPOS
+      * or process subfile changed records
+     C                     ELSE
+     C                     EXSR @SFLRD
+     C                     ENDIF
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      * Read changed records in subfile to check for selection       *
+      *==============================================================*
+      *
+     C           @SFLRD    BEGSR
+      *
+      * Did user make a selection?
+     C                     READCSFL                      98
+      *
+     C           *IN98     DOWEQ*OFF
+      *
+      * If user made selection,
+      *   initialize output variable with user selection
+      *   and force end of program.
+     C           SELIO     IFEQ 1
+     C                     Z-ADDCCUST     O#CUST
+     C                     MOVE @TRUE     @EXIT
+     C                     LEAVE
+     C                     ENDIF
+      *
+     C                     READCSFL                      98
+     C                     ENDDO
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      * F03 key subroutine                                           *
+      *==============================================================*
+      *
+     C           @F03SR    BEGSR
+      *
+      * set exit program flag
+     C                     MOVE @TRUE     @EXIT
+     C                     MOVE KEY       O#KEY
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      * F11 key subroutine                                           *
+      *==============================================================*
+      *
+     C           @F11SR    BEGSR
+      *
+      *  Rotate View numbers 1, 2, and 3.
+     C                     ADD  1         V
+     C           V         IFEQ 4
+     C                     MOVE 1         V
+     C                     ENDIF
+      *
+      *  Set view indicators.
+     C           V         ADD  10        IN
+     C                     MOVE *OFF      *IN11
+     C                     MOVE *OFF      *IN12
+     C                     MOVE *OFF      *IN13
+     C                     MOVE *ON       *IN,IN
+      *
+      *  Load subfile with current view.
+     C                     EXSR @RBDSF
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      * F12 key subroutine                                           *
+      *==============================================================*
+      *
+     C           @F12SR    BEGSR
+      *
+      * set exit program flag
+     C                     MOVE @TRUE     @EXIT
+     C                     MOVE KEY       O#KEY
+      *
+     C                     ENDSR
+      *
+      *
+     OUEDIT40 E                UEDITO
+     O                         BLANKS    40
+     O                 21      CCITY     20
+     O                 21      CSTACD    24
+     O                 21      CZIPCD    38
+     O                 22      CCONT     25
+     O                 22      CPHONE    35 ' -   -   -    '
+     O                 23      CARBAL1   15 '$'
+     O                 23      CCRLMT1   35 '$'
+      *
+**  LIT - Display literals
+Display
+Select

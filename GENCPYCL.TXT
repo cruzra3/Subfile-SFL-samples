@@ -1,0 +1,57 @@
+/*********************************************************************/
+/*    Program Name:  GENCPYCL                                        */
+/*    Description:  GENERATE VARIABLE COPY MODULE FOR SUBFILE SORT   */
+/*                                                                   */
+/*    (c) Copyright Jonathan E. Yergin, 1991 USA                     */
+/*    JEY  03/29/91  Original Version.                               */
+/*********************************************************************/
+             PGM        PARM(&DSPFLIB &SRCFLIB &SRCMBR)
+
+             DCL        VAR(&DSPFLIB) TYPE(*CHAR) LEN(20)
+             DCL        VAR(&SRCFLIB) TYPE(*CHAR) LEN(20)
+             DCL        VAR(&SRCMBR) TYPE(*CHAR) LEN(10)
+
+             DCL        VAR(&DSPFIL) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&DSPLIB) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&SRCFIL) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&SRCLIB) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&MSGID) TYPE(*CHAR) LEN(7)
+             DCL        VAR(&MSGDTA) TYPE(*CHAR) LEN(100)
+
+/*  Global monitor messages.                                         */
+             MONMSG     MSGID(CPF0000) EXEC(GOTO CMDLBL(ERROR))
+
+/*  Extract display file and library.                                */
+             CHGVAR     VAR(&DSPFIL) VALUE(%SST(&DSPFLIB 1 10))
+             CHGVAR     VAR(&DSPLIB) VALUE(%SST(&DSPFLIB 11 10))
+
+/*  Extract source file and library.                                 */
+             CHGVAR     VAR(&SRCFIL) VALUE(%SST(&SRCFLIB 1 10))
+             CHGVAR     VAR(&SRCLIB) VALUE(%SST(&SRCFLIB 11 10))
+
+/*  Build source member name if *DEFAULT specified.                  */
+             IF         COND(&SRCMBR = *DEFAULT) THEN(DO)
+                 CHGVAR     VAR(&SRCMBR) VALUE(%SST(&DSPFIL 1 6) *CAT +
+                              'CPY')
+             ENDDO
+
+/*  Extract file field descriptions.                                 */
+             DSPFFD     FILE(&DSPLIB/&DSPFIL) OUTPUT(*OUTFILE) +
+                          OUTFILE(QTEMP/QADSPFFD)
+
+/*  Add the source file member.                                      */
+             ADDPFM     FILE(&SRCLIB/&SRCFIL) MBR(&SRCMBR)
+             MONMSG     MSGID(CPF7306)
+
+/*  Add records to the source file member.                           */
+             OVRDBF     FILE(QADSPFFD) TOFILE(QTEMP/QADSPFFD)
+             OVRDBF     FILE(RPGSRC) TOFILE(&SRCLIB/&SRCFIL) +
+                          MBR(&SRCMBR)
+             CALL       PGM(GENCPY)
+             DLTOVR     FILE(*ALL)
+             GOTO       CMDLBL(ENDPGM)
+
+ ERROR:      RCVMSG     MSGDTA(&MSGDTA) MSGID(&MSGID)
+             SNDPGMMSG  MSGID(&MSGID) MSGF(QCPFMSG) MSGDTA(&MSGDTA)
+
+ ENDPGM:     ENDPGM

@@ -1,0 +1,73 @@
+      *==============================================================*
+      *  SFL014DF - INVOICE/PAYMENT MATCHING DISPLAY FILE            *
+      *  (c) Copyright Jonathan E. Yergin, 1991 USA                  *
+      *    & Wayne Madden, 1993 USA                                  *
+      *==============================================================*
+      *
+     A                                      DSPSIZ(24 80 *DS3)
+     A                                      PRINT
+      *
+     A          R SFLHDR
+     A                                  1  2'SFL014'
+     A                                  1 30'Invoice/Payment Matching'
+     A                                      DSPATR(HI)
+     A                                  3  1'Type options, press Enter.'
+     A                                      COLOR(BLU)
+     A                                  4  3'1=Select' COLOR(BLU)
+      *
+     A          R SFL1                      SFL
+     A            SELIO          1S 0I  7  3VALUES(0 1) DSPATR(PC)
+     A            ICUST     R        O  7  8REFFLD(ICUST INVPF)
+     A            IINV#     R        O  7 16REFFLD(IINV# INVPF)
+     A            IIMDY          6Y 0O  7 26EDTCDE(Y)
+     A            IGAMT     R        O  7 37REFFLD(IGAMT INVPF)
+     A                                      EDTCDE(3)
+      *
+     A          R SFLCTL1                   SFLCTL(SFL1)
+     A                                      CA03 CA12
+     A                                      BLINK OVERLAY
+     A N40                                  SFLDSPCTL SFLEND(*MORE)
+     A  42                                  SFLDSP
+     A  40                                  SFLCLR
+     A                                      SFLSIZ(7) SFLPAG(6)
+     A            SFLRN1         4S 0H      SFLRCDNBR(CURSOR)
+     A                                  5 16'- - - - I N V O I C E - - - -'
+     A                                      DSPATR(HI)
+     A                                  6  8'Cust#   Number      Date       Amo-
+     A                                      unt' DSPATR(HI)
+      *
+     A          R SFL2                      SFL
+     A            SELIO          1S 0I 16  3VALUES(0 1) DSPATR(PC)
+     A            PCUST     R        O 16  8REFFLD(PCUST PAYPF)
+     A            PCHK#     R        O 16 17REFFLD(PCHK# PAYPF)
+     A            PCMDY          6Y 0O 16 26EDTCDE(Y)
+     A            PCAMT     R        O 16 37REFFLD(PCAMT PAYPF)
+     A                                      EDTCDE(3)
+     A            PCREF     R        O 16 48REFFLD(PCREF PAYPF)
+      *
+     A          R SFLCTL2                   SFLCTL(SFL2)
+     A                                      CA03 CA12
+     A                                      BLINK OVERLAY
+     A N40                                  SFLDSPCTL SFLEND(*MORE)
+     A  43                                  SFLDSP
+     A  40                                  SFLCLR
+     A                                      SFLSIZ(7) SFLPAG(6)
+     A            SFLRN2         4S 0H      SFLRCDNBR(CURSOR)
+     A                                 14 16'- - - - - C H E C K - - - - -'
+     A                                      DSPATR(HI)
+     A                                 15  8'Cust#   Number      Date       Amo-
+     A                                      unt' DSPATR(HI)
+      *
+     A          R SFLCMD
+     A                                      OVERLAY
+     A                                 23  2'F3=Exit' COLOR(BLU)
+     A                                 23 14'F12=Cancel' COLOR(BLU)
+     A  11                             24  2'Customer:' DSPATR(HI)
+     A  11        CUSNBR    R        O 24 13REFFLD(ICUST INVPF)
+     A                                      DSPATR(HI)
+     A  11                             24 21'Invoice:' DSPATR(HI)
+     A  11        INVNBR    R        O 24 31REFFLD(IINV# INVPF)
+     A                                      DSPATR(HI)
+     A  11                             24 41'Check:' DSPATR(HI)
+     A  11        CHKNBR    R        O 24 49REFFLD(PCHK# PAYPF)
+     A                                      DSPATR(HI)

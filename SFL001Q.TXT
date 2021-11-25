@@ -1,0 +1,23 @@
+/*********************************************************************/
+/*    Program Name:  SFL001Q                                         */
+/*    Description:  CUSTOMER MASTER INQUIRY WITH CONTEXTUAL SEARCH   */
+/*                                                                   */
+/*    (c) Copyright Jonathan E. Yergin, 1991 USA                     */
+/*********************************************************************/
+             PGM
+             DCLF       FILE(SFL001PM)
+
+/*  Display prompt.                                                  */
+ DISPLAY:    CHGVAR     VAR(&CONTEXT) VALUE(' ')
+             SNDRCVF
+             IF         COND(&IN03 *OR &IN12) THEN(GOTO CMDLBL(ENDPGM))
+
+             OVRDBF     FILE(CUSTLF) SHARE(*YES)
+             OPNQRYF    FILE((CUSTLF)) QRYSLT('CNAME *CT "' *CAT +
+                          &CONTEXT *TCAT '"') KEYFLD(*FILE) +
+                          OPTIMIZE(*FIRSTIO) SEQONLY(*NO)
+             CALL       PGM(SFL001)
+             RCLRSC
+             GOTO       CMDLBL(DISPLAY)
+
+ ENDPGM:     ENDPGM

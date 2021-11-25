@@ -1,0 +1,4 @@
+     A          R CUSTR                     PFILE(CUSTPF)
+      *
+     A          K CNAME
+     A          K CCUST

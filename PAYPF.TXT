@@ -1,0 +1,14 @@
+      *  PAYPF - Payments Transaction physical file
+     A                                      UNIQUE
+      *
+     A          R PAYR                      TEXT('Customer Payment Record')
+      *
+     A            PCUST     R               REFFLD(CCUST CUSTPF)
+     A            PCHK#          5S 0       COLHDG('Check' 'Number')
+     A            PCDAT          7S 0       COLHDG('Check' 'Date')
+     A            PCAMT          7P 2       COLHDG('Check' 'Amount')
+     A            PCREF         10A         COLHDG('Check' 'Reference')
+      *
+     A          K PCUST
+     A          K PCHK#
+     A          K PCDAT

@@ -1,0 +1,281 @@
+      *==============================================================*
+      *  SFL008 - ITEM TRANSACTION ENTRY w/ SFLINZ and SFLENTER      *
+      *  (c) Copyright Jonathan E. Yergin, 1991 USA                  *
+      *    & Wayne Madden, 1993 USA                                  *
+      *==============================================================*
+      *
+     FVENDPF  IF  E           K        DISK
+     FITEMPF  IF  E           K        DISK
+     FTRANSPF UF  E           K        DISK                      A
+     FSFL008DFCF  E                    WORKSTN      KINFDS WSDS
+     F                                        SFLRN KSFILE SFL
+      *
+      * Standard include for all interactive programs
+      *   named hexadecimal constants for function keys
+     I              X'31'                 C         @F01
+     I              X'32'                 C         @F02
+     I              X'33'                 C         @F03
+     I              X'34'                 C         @F04
+     I              X'35'                 C         @F05
+     I              X'36'                 C         @F06
+     I              X'37'                 C         @F07
+     I              X'38'                 C         @F08
+     I              X'39'                 C         @F09
+     I              X'3A'                 C         @F10
+     I              X'3B'                 C         @F11
+     I              X'3C'                 C         @F12
+     I              X'B1'                 C         @F13
+     I              X'B2'                 C         @F14
+     I              X'B3'                 C         @F15
+     I              X'B4'                 C         @F16
+     I              X'B5'                 C         @F17
+     I              X'B6'                 C         @F18
+     I              X'B7'                 C         @F19
+     I              X'B8'                 C         @F20
+     I              X'B9'                 C         @F21
+     I              X'BA'                 C         @F22
+     I              X'BB'                 C         @F23
+     I              X'BC'                 C         @F24
+     I              X'BD'                 C         @CLEAR
+     I              X'F1'                 C         @ENTER
+     I              X'F3'                 C         @HELP
+     I              X'F4'                 C         @PAGUP
+     I              X'F5'                 C         @PAGDN
+     I              X'F6'                 C         @PRINT
+      *
+      * Standard include for all interactive programs
+      *   Defines standard constants
+     I              '0'                   C         @FALSE
+     I              '1'                   C         @TRUE
+      *
+      * Standard include for all interactive programs
+      *   display file information data structure
+     IWSDS        DS
+      *               Identifies the key pressed
+     I                                      369 369 KEY
+      *               Identifies the subfile page rrn
+     I                                    B 378 3790PAGRRN
+      *
+      *==============================================================*
+      * Reset variables and clear subfile                            *
+      *   in case program called again after *INLR = *OFF            *
+      *   ensures that program starts again properly                 *
+      *==============================================================*
+      *
+     C                     RESET@EXIT
+     C                     EXSR @RESET
+      *
+      *==============================================================*
+      * Program mainline                                             *
+      *==============================================================*
+      *
+      * Perform until exit requested using F03 or F12
+     C           @EXIT     DOUEQ@TRUE
+      *
+     C                     WRITESFLHDR
+     C                     WRITESFLCMD
+     C                     EXFMTSFLCTL
+      *
+      * Process response
+     C           KEY       CASEQ@F03      @F03SR            F03 exit
+     C           KEY       CASEQ@F12      @F12SR            F12 cancel
+     C                     CAS            @ENTKY            Enter
+     C                     ENDCS
+      *
+     C                     ENDDO
+      *
+      * End of program, you can modify to leave *INLR = *OFF
+      *   and program will still work properly when called again
+      *
+     C                     MOVE *ON       *INLR
+     C                     RETRN
+      *
+      *==============================================================*
+      * Subroutine Section of Program                                *
+      *==============================================================*
+      *
+      *==============================================================*
+      * Initialization Subroutine                                    *
+      *==============================================================*
+      *
+     C           *INZSR    BEGSR
+      *
+     C           *LIKE     DEFN DITEM     KITEM
+     C           *LIKE     DEFN DVEND     KVEND
+      *
+      * Create program exit flag and set value to @FALSE
+     C                     MOVE @FALSE    @EXIT   1
+      * Create error flag and set value to @FALSE
+     C                     MOVE @FALSE    @ERR    1
+     C                     MOVE @FALSE    I71     1
+     C                     MOVE @FALSE    I72     1
+      *
+      * Miscellaneous subfile program variables
+     C                     Z-ADD0         SFLRN   40
+      *
+      * Transaction detail key
+     C           DTLKEY    KLIST
+     C                     KFLD           KITEM
+     C                     KFLD           KVEND
+      *
+      * Item master key
+     C           ITMKEY    KLIST
+     C                     KFLD           KVEND
+     C                     KFLD           KITEM
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      * Clear subfile                                                *
+      *==============================================================*
+      *
+     C           @RESET    BEGSR
+      *
+      * Clear subfile and reset subfile display indicator.
+     C                     MOVE *ON       *IN40
+     C                     WRITESFLCTL
+     C                     MOVE *OFF      *IN40
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      * Process enter key                                            *
+      *==============================================================*
+      *
+     C           @ENTKY    BEGSR
+      *
+      * Verify vendor number
+     C                     RESET@ERR
+      *
+     C           SVEND     IFEQ *ZEROS
+     C                     MOVE *ON       *IN70
+     C                     MOVE @TRUE     @ERR
+     C                     ELSE
+     C           SVEND     CHAINVENDPF               21
+     C           *IN21     IFEQ *ON
+     C                     MOVE *ON       *IN70
+     C                     MOVE @TRUE     @ERR
+     C                     ENDIF
+     C                     ENDIF
+      *
+      * If no error, read changed subfile records
+     C           @ERR      IFEQ @FALSE
+     C                     EXSR @SFLRD
+     C                     ENDIF
+      *
+      * Check for errors, and reset error indicators for output
+     C           @ERR      IFEQ @TRUE
+     C                     MOVE I71       *IN71
+     C                     MOVE I72       *IN72
+     C                     ENDIF
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      * Read changed records in subfile to check for selection       *
+      *==============================================================*
+      *
+     C           @SFLRD    BEGSR
+      *
+      * Did user make a selection?
+     C                     READCSFL                      98
+      *
+     C           *IN98     DOWEQ*OFF
+      *
+      * Only check if SITEM or SQNTY are entered
+     C           SITEM     IFNE 0
+     C           SQNTY     ORNE 0
+      * Must enter valid itema and quantity
+     C                     EXSR @TRNED
+     C           @ERR      IFEQ @FALSE
+     C                     EXSR @WRTRC
+     C                     ELSE
+     C                     MOVE *ON       *IN08
+     C                     UPDATSFL
+     C                     MOVE *OFF      *IN08
+     C                     ENDIF
+     C                     ENDIF
+      *
+     C                     READCSFL                      98
+     C                     ENDDO
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      *  Edit Transaction record fields                              *
+      *==============================================================*
+      *
+     C           @TRNED    BEGSR
+      *  Reset error indicators.
+     C                     MOVE *OFF      *IN71
+     C                     MOVE *OFF      *IN72
+     C                     RESET@ERR
+      *
+      *  Item must exist
+     C           SITEM     IFEQ 0
+     C                     MOVE *ON       *IN71
+     C                     ELSE
+     C                     Z-ADDSVEND     KVEND
+     C                     Z-ADDSITEM     KITEM
+     C           ITMKEY    CHAINITEMPF               71
+     C                     ENDIF
+      *
+      * Quantity must be > 0
+     C           *IN71     IFEQ *OFF
+     C           SQNTY     IFEQ 0
+     C                     MOVE *ON       *IN72
+     C                     ENDIF
+     C                     ENDIF
+      *
+      * Set flags to control MSGSFL indicators in @ENTKY subroutine
+      *
+     C           *IN71     IFEQ *ON
+     C                     MOVE @TRUE     @ERR
+     C                     MOVE @TRUE     I71
+     C                     ENDIF
+      *
+     C           *IN72     IFEQ *ON
+     C                     MOVE @TRUE     @ERR
+     C                     MOVE @TRUE     I72
+     C                     ENDIF
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      *  Write record to the transaction file                        *
+      *==============================================================*
+      *
+     C           @WRTRC    BEGSR
+      *
+     C           DTLKEY    CHAINTRANS                21
+     C           *IN21     IFEQ *OFF
+     C                     Z-ADDSITEM     DITEM
+     C                     Z-ADDSVEND     DVEND
+     C                     Z-ADDSQNTY     DQNTY
+     C                     WRITETRANS
+     C                     ENDIF
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      * F03 key subroutine                                           *
+      *==============================================================*
+      *
+     C           @F03SR    BEGSR
+      *
+      * set exit program flag
+     C                     MOVE @TRUE     @EXIT
+      *
+     C                     ENDSR
+      *
+      *==============================================================*
+      * F12 key subroutine                                           *
+      *==============================================================*
+      *
+     C           @F12SR    BEGSR
+      *
+      * set exit program flag
+     C                     MOVE @TRUE     @EXIT
+      *
+     C                     ENDSR
+      *

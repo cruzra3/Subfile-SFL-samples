@@ -1,0 +1,23 @@
+/*********************************************************************/
+/*    Command Name:  GENCOPY                                         */
+/*    Description:  GENERATE VARIABLE COPY MODULE FOR SUBFILE SORT   */
+/*                                                                   */
+/*    (c) Copyright Jonathan E. Yergin, 1991 USA                     */
+/*    JEY  04/12/91  Original Version.                               */
+/*********************************************************************/
+             CMD        PROMPT('Generate /COPY for SFLSORT')
+
+             PARM       KWD(DSPFLIB) TYPE(NAME1) MIN(1) +
+                          PROMPT('Display file name:')
+ NAME1:      QUAL       TYPE(*NAME) LEN(10)
+             QUAL       TYPE(*NAME) LEN(10) DFT(*LIBL) +
+                          SPCVAL((*LIBL)) PROMPT('Library name:')
+
+             PARM       KWD(SRCFLIB) TYPE(NAME2) MIN(0) +
+                          PROMPT('Source file name:')
+ NAME2:      QUAL       TYPE(*NAME) LEN(10) DFT(QRPGSRC)
+             QUAL       TYPE(*NAME) LEN(10) DFT(*LIBL) +
+                          SPCVAL((*LIBL)) PROMPT('Library name:')
+
+             PARM       KWD(SRCMBR) TYPE(*CHAR) LEN(10) DFT(*DEFAULT) +
+                          MIN(0) PROMPT('Source member name:')

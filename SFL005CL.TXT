@@ -1,0 +1,16 @@
+/*********************************************************************/
+/*    Program Name:  SFL005CL                                        */
+/*    Description:  CUSTOMER MASTER                                  */
+/*                  UPDATE W/READC EXAMPLE                           */
+/*    (c) Copyright Jonathan E. Yergin, 1991 USA                     */
+/*        & Wayne Madden, 1993 USA                                   */
+/*********************************************************************/
+
+  PGM
+
+  CALL SFL005
+
+  RCLRSC
+
+FINISH:
+  ENDPGM

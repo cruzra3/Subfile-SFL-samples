@@ -1,0 +1,50 @@
+      *=============================================================*
+      *  SFL004DF - CUSTOMER MASTER INQUIRY DISPLAY FILE            *
+      *  (c) Copyright Jonathan E. Yergin, 1991 USA                 *
+      *    & Wayne Madden, 1993 USA                                 *
+      *                                                             *
+      *  (SFLCSRRRN added to identify cursor position in subfile)   *
+      *  (Changes to SFL003DF are marked)                           *
+      *=============================================================*
+     A                                      DSPSIZ(24 80 *DS3) PRINT
+     A                                      REF(CUSTPF)
+      *
+     A          R SFLHDR
+->   A                                  1  2'SFL004'
+     A                                  1 29'Customer Master Select'
+     A                                      DSPATR(HI)
+      *
+     A          R SFL                       SFL
+     A            CNAME     R        O  7  5
+     A            CCUST     R        O  7 32EDTCDE(Z)
+     A            CCITY     R        O  7 40
+     A            CSTACD    R        O  7 62
+     A            CZIPCD    R        O  7 68
+      *
+     A          R SFLCTL                    SFLCTL(SFL)
+     A                                      BLINK OVERLAY
+     A                                      CA03 CA12 PAGEDOWN
+     A  40                                  SFLCLR
+     A                                      SFLDSPCTL
+     A  42                                  SFLDSP
+     A  99                                  SFLEND(*MORE)
+->   A                                      SFLCSRRRN(&CSRRRN)
+     A                                      SFLSIZ(16) SFLPAG(15)
+     A  60                                  SFLMSG('Roll up or down beyond fir-
+     A                                      st or last record in subfile.' 60)
+->   A  61                                  SFLMSG('Must place cursor on a -
+->   A                                       record, then press Enter.' 61)
+     A            SFLPS          4S 0H      SFLRCDNBR
+->   A            CSRRRN         5S 0H
+->   A                                  3  2'Position cursor, press Enter -
+->   A                                      to select.' COLOR(BLU)
+     A                                  4 30'Position to customer . .'
+     A            SEARCH        25A  I  4 55CHECK(LC)
+     A                                  6  5'Customer Name              Numb-
+     A                                      er  City                 State  Zip'
+     A                                      DSPATR(HI)
+      *
+     A          R SFLCMD
+     A                                      OVERLAY
+     A                                 23  2'F3=Exit' COLOR(BLU)
+     A                                 23 14'F12=Cancel' COLOR(BLU)

@@ -1,0 +1,4 @@
+      * VENDOR MASTER FILE, KEYED BY NAME AND NUMBER
+     A          R VENDOR                    PFILE(VENDPF)
+     A          K VNAME
+     A          K VVEND

@@ -1,0 +1,38 @@
+      *==============================================================*
+      *  SFL007DF - ITEM TRANSACTIONS ENTRY DISPLAY FILE             *
+      *  (c) Copyright Jonathan E. Yergin, 1991 USA                  *
+      *    & Wayne Madden, 1993 USA                                  *
+      *==============================================================*
+      *
+     A                                      DSPSIZ(24 80 *DS3)
+     A                                      PRINT
+      *
+     A          R SFLHDR
+     A                                  1  2'SFL007'
+     A                                  1 33'Item Transactions' DSPATR(HI)
+      *
+     A          R SFL                       SFL
+     A            SFRRN          2Y 0O  7  4EDTWRD('  .')
+     A            SITEM     R     Y  B  7  9REFFLD(IITEM ITEMPF)
+     A                                      EDTCDE(4) CHECK(RB) DSPATR(PC)
+     A            SQNTY     R     Y  B  7 21REFFLD(DQNTY TRANSPF)
+     A                                      EDTCDE(4) CHECK(RB)
+      *
+     A          R SFLCTL                    SFLCTL(SFL)
+     A                                      SFLSIZ(45) SFLPAG(15)
+     A                                      BLINK OVERLAY
+     A                                      CA03 CA12
+     A N40                                  SFLDSP SFLDSPCTL SFLEND(*MORE)
+     A  40                                  SFLCLR
+     A                                  3  3'Type the following, then press -
+     A                                       enter.' COLOR(BLU)
+     A                                  4 55'Vendor . . .'
+     A            SVEND     R     Y  B  4 68REFFLD(VVEND VENDPF)
+     A                                      EDTCDE(4) CHECK(RB)
+     A  70                                  ERRMSG('Invalid vendor number' 70)
+     A                                  6  2'  Seq     Item   Quantity'
+     A                                      DSPATR(HI)
+      *
+     A          R SFLCMD                    OVERLAY
+     A                                 23  2'F3=Exit' COLOR(BLU)
+     A                                 23 14'F12=Cancel' COLOR(BLU)

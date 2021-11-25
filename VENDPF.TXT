@@ -1,0 +1,12 @@
+      *  VENDPF - VENDOR MASTER PHYSICAL FILE
+     A                                      UNIQUE
+     A          R VENDOR                    TEXT('Vendor Master')
+     A            VVEND          5S 0       COLHDG('Vendor' 'Number')
+     A            VNAME         25A         COLHDG('Vendor' 'Name')
+     A            VADDR1        25A         COLHDG('Address' 'Line 1')
+     A            VADDR2        25A         COLHDG('Address' 'Line 2')
+     A            VCITY         20A         COLHDG('City')
+     A            VSTACD         2A         COLHDG('State')
+     A            VZIPCD        10A         COLHDG('Zip' 'Code')
+     A            VPHONE        11P 0       COLHDG('Telephone' 'Number')
+     A          K VVEND

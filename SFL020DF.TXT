@@ -1,0 +1,59 @@
+      *==============================================================*
+      *  SFL020DF - CUSTOMER MASTER SEARCH (alternate view) DISPLAY  *
+      *  (c) Copyright Jonathan E. Yergin, 1991 USA                  *
+      *    & Wayne Madden, 1993 USA                                  *
+      *==============================================================*
+      *
+     A                                      REF(CUSTPF)
+     A                                      PRINT
+      *
+     A          R SFLHDR
+     A                                  1  2'SFL020'
+     A                                  1 31'Customer Master' DSPATR(HI)
+     A            DSPMOD         8A  O  1 47DSPATR(HI)
+      *
+     A          R SFL                       SFL
+     A            SELIO          1S 0I  7  2VALUES(0 1)
+     A  05                                  DSPATR(UL)
+     A N05                                  DSPATR(PR)
+     A            CNAME     R        O  7  5
+     A  11        CCUST     R        O  7 32EDTCDE(Z)
+     A  11        CCITY     R        O  7 40
+     A  11        CSTACD    R        O  7 63
+     A  11        CZIPCD    R        O  7 68
+     A  12        CADDR1    R        O  7 35
+     A  12        CPHONE    R        O  7 65EDTWRD(' -   -   -    ')
+     A  13        CADDR2    R        O  7 35
+      *
+     A          R SFLCTL                    SFLCTL(SFL)
+     A                                      BLINK OVERLAY
+     A                                      SFLSIZ(15) SFLPAG(15)
+     A                                      CA03 CA11 CA12
+     A                                      PAGEUP PAGEDOWN
+     A  42                                  SFLDSP
+     A N40                                  SFLDSPCTL
+     A  40                                  SFLCLR
+     A  91                                  SFLEND(*MORE)
+     A  60                                  SFLMSG('Roll up or down beyond fir-
+     A                                      st or last record in subfile.' 60)
+     A  05                              3  1'Type options, press Enter.'
+     A                                      COLOR(BLU)
+     A  05                              4  3'1=Select' COLOR(BLU)
+     A                                  4 30'Position to customer . .'
+     A            SEARCH        25A  I  4 55CHECK(LC)
+     A                                  6  1'Sel' DSPATR(HI)
+     A                                  6  5'Customer Name' DSPATR(HI)
+     A  11                              6 32'Number' DSPATR(HI)
+     A  11                              6 40'City' DSPATR(HI)
+     A  11                              6 61'State' DSPATR(HI)
+     A  11                              6 68'Zip' DSPATR(HI)
+     A  12                              6 35'Address Line 1' DSPATR(HI)
+     A  12                              6 65'Telephone' DSPATR(HI)
+     A  13                              6 35'Address Line 2' DSPATR(HI)
+      *
+     A          R SFLCMD                    OVERLAY
+     A                                 23  2'F3=Exit' COLOR(BLU)
+     A  11                             23 14'F11=View 2' COLOR(BLU)
+     A  12                             23 14'F11=View 3' COLOR(BLU)
+     A  13                             23 14'F11=View 1' COLOR(BLU)
+     A                                 23 29'F12=Cancel' COLOR(BLU)

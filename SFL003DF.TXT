@@ -1,0 +1,49 @@
+      *=============================================================*
+      *  SFL003DF - CUSTOMER MASTER SELECT DISPLAY FILE             *
+      *  (c) Copyright Jonathan E. Yergin, 1991 USA                 *
+      *    & Wayne Madden, 1993 USA                                 *
+      *                                                             *
+      *  (Changes from SFL001DF are marked)                         *
+      *=============================================================*
+      *
+     A                                      DSPSIZ(24 80 *DS3) PRINT
+     A                                      REF(CUSTPF)
+      *
+     A          R SFLHDR
+->   A                                  1  2'SFL003'
+->   A                                  1 29'Customer Master Select'
+     A                                      DSPATR(HI)
+      *
+     A          R SFL                       SFL
+->   A            SELIO          1S 0I  7  3VALUES(0 1) DSPATR(PC)
+->   A            CNAME     R        O  7  6
+->   A            CCUST     R        O  7 33EDTCDE(Z)
+->   A            CCITY     R        O  7 41
+->   A            CSTACD    R        O  7 63
+->   A            CZIPCD    R        O  7 69
+      *
+     A          R SFLCTL                    SFLCTL(SFL)
+     A                                      BLINK OVERLAY
+     A                                      CA03 CA12 PAGEDOWN
+     A  40                                  SFLCLR
+     A                                      SFLDSPCTL
+     A  42                                  SFLDSP
+     A  99                                  SFLEND(*MORE)
+     A                                      SFLSIZ(16) SFLPAG(15)
+     A  60                                  SFLMSG('Roll up or down beyond fir-
+     A                                      st or last record in subfile.' 60)
+     A            SFLPS          4S 0H      SFLRCDNBR
+->   A                                  3  1'Type options, press Enter.'
+->   A                                      COLOR(BLU)
+->   A                                  4  3'1=Select' COLOR(BLU)
+     A                                  4 30'Position to customer . .'
+     A            SEARCH        25A  I  4 55CHECK(LC)
+->   A                                  6  2'Sel' DSPATR(HI)
+->   A                                  6  6'Customer Name              Numb-
+     A                                      er  City                 State  Zip'
+     A                                      DSPATR(HI)
+      *
+     A          R SFLCMD
+     A                                      OVERLAY
+     A                                 23  2'F3=Exit' COLOR(BLU)
+     A                                 23 14'F12=Cancel' COLOR(BLU)

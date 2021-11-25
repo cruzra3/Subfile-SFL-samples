@@ -1,0 +1,147 @@
+      *
+      *  GENCPY - GENERATE VARIABLE COPY MODULE FOR SUBFILE SORT
+      *  (c) Copyright Jonathan E. Yergin, 1991 USA
+      *
+      *  JEY  03/28/91  Original version.
+      *
+     FQADSPFFDIF  E                    DISK
+     FRPGSRC  O   F      92            DISK
+     E                    FLD        10  6               Field information
+      *  DO loop factor 2 should match array size.
+     E                    SRC     1  43 80               Source template
+     I            DS
+     I                                        1   6 FLDINF
+     I                                        1   30BEGPOS
+     I                                        4   60ENDPOS
+      *----------------------------------------------------*
+      *  Initialize fields.
+      *----------------------------------------------------*
+      *
+     C                     MOVE *ZEROS    BEGPOS
+     C                     MOVE *ZEROS    ENDPOS
+     C                     MOVE *ZEROS    F       30
+     C                     MOVE *ZEROS    S       30
+     C                     MOVE *ZEROS    SRCSEQ  60
+     C                     MOVE *BLANKS   SOURCE 80
+     C                     MOVE *BLANKS   SRCTST  3
+      *
+      *----------------------------------------------------*
+      *  Get field information for the SFL format.
+      *----------------------------------------------------*
+      *
+     C           *IN90     DOWEQ'0'                        -1-
+     C                     READ QWHDRFFD                 90
+     C           *IN90     IFEQ '0'                        -2-
+     C           WHNAME    ANDEQ'SORTSFL'
+     C           WHFOBO    ANDGT*ZEROS
+     C                     MOVE WHFOBO    BEGPOS
+     C           BEGPOS    ADD  WHFLDB    ENDPOS
+     C                     SUB  1         ENDPOS
+      *    Store information for this field.
+     C                     ADD  1         F
+     C                     MOVE FLDINF    FLD,F
+     C                     END                             -2-
+     C                     END                             -1-
+      *
+      *----------------------------------------------------*
+      *  Write source records to the file.
+      *----------------------------------------------------*
+      *
+     C                     DO   43        S                -3-
+     C                     MOVEA'0000'    *IN,11
+     C                     MOVE SRC,S     SOURCE
+     C                     MOVELSOURCE    SRCTST
+      *
+      *    Data structure subfields.
+     C           SRCTST    IFEQ 'Tab'                      -4-
+     C                     MOVE '1'       *IN11
+     C                     ADD  100       SRCSEQ
+     C                     EXCPTSRCLIN
+     C                     ELSE                            -4-
+      *
+      *    Table ** specification.
+     C           SRCTST    IFEQ '++ '                      -5-
+     C                     MOVE '1'       *IN14
+     C                     ADD  100       SRCSEQ
+     C                     EXCPTSRCLIN
+     C                     ELSE                            -5-
+      *
+      *    Table records for Column look-up.
+     C           SRCTST    IFEQ '000'                      -6-
+     C                     MOVE '1'       *IN15
+     C                     DO   10        F                -7-
+     C           FLD,F     IFNE *BLANKS                    -8-
+     C                     MOVE FLD,F     FLDINF
+     C                     ADD  100       SRCSEQ
+     C                     EXCPTSRCLIN
+     C                     END                             -8-
+     C                     END                             -7-
+     C                     ELSE                            -6-
+      *
+      *    All other source statements
+     C                     ADD  100       SRCSEQ
+     C                     EXCPTSRCLIN
+     C                     END                             -6-
+     C                     END                             -5-
+     C                     END                             -4-
+      *
+     C                     END                             -3-
+      *
+      *----------------------------------------------------*
+      *  Terminate
+      *----------------------------------------------------*
+      *
+     C                     MOVE '1'       *INLR
+     C                     RETRN
+     ORPGSRC  E                SRCLIN
+     O                         SRCSEQ     6
+     O                                   12 '000000'
+     O                         SOURCE    92
+     O                 11      F     3   51
+     O                 14                14 '**'
+     O                 15      BEGPOS    18
+     O                 15      ENDPOS    21
+**  SRC  Source template
+     F                                              KINFDS INFDS
+Tab  E                    TABA    1 Nbr  3 0ATABB    6   Column/From,To
+     IINFDS       DS
+     I                                      370 371 ROWCOL
+     I                                    B 380 3810TOPRRN
+     I            DS
+     I                                    B   1   20COL
+     I                                        2   2 COLA
+      *
+      *----------------------------------------------------*
+      *  F11-Sort.
+      *----------------------------------------------------*
+     C           SORT      BEGSR
+      *
+      *  If there are records to sort ...
+     C           TOPRRN    IFNE *ZEROS                     -1-
+      *
+      *  Convert cursor position to column.
+     C                     MOVE *ZEROS    COL
+     C                     MOVE ROWCOL    COLA
+      *  Convert column to From and To positions.
+     C                     MOVE COL       NF#030  30
+     C           NF#030    LOKUPTABA      TABB       50  50
+     C                     MOVELTABB      F
+     C                     MOVE TABB      T
+      *
+      *  Call sort program.
+     C                     CALL 'NRQSFL'
+     C                     PARM 1         B       50
+     C                     PARM TOPRRN    E       50
+     C                     PARM           F       30
+     C                     PARM           T       30
+      *
+      *  Reset subfile position field.
+     C                     Z-ADD1         SFLPOS
+     C                     END                             -1-
+      *
+      *  Set redisplay indicator.
+     C                     MOVE '1'       *IN01
+      *
+     C                     ENDSR
+**  TABA/TABB - Column/From,To
+000Frm To

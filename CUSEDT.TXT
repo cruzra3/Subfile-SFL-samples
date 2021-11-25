@@ -1,0 +1,84 @@
+     FCUSTPF  IF  E           K        DISK
+     E                    IND        11  1
+     E                    MSG     1   2 65
+     I              '0'                   C         @FALSE
+     I              '1'                   C         @TRUE
+      *
+     I              ' '                   C         @BLANK
+     I              0                     C         @NULL
+     I              '*ALL'                C         @ALL
+     I              '*DIAG'               C         @DIAG
+     I              '*ESCAPE'             C         @ESCAP
+     I              0                     C         @CUSTK
+     I              1                     C         @PRSTK
+     I              '*'                   C         @CUQUE
+      *
+     I            DS
+     I I            ' '                       1   7 MSGID
+     I I            'QCPFMSG   QSYS      '    8  27 MSGF
+     I I            ' '                      28 106 MSGTXT
+     I I            79                    B 107 1100MSGLEN
+     I I            ' '                     111 120 MSGTYP
+     I I            '*'                     121 130 MSGQ
+     I I            0                     B 131 1340MSGSTK
+     I I            ' '                     135 138 MSGKEY
+     I I            X'0000000000000000'     149 156 MSGERR
+     I I            1                     B 157 1600MSGNTY
+     I I            '*'                     161 170 MSGPQ
+     I I            ' '                     171 180 MSGRMV
+     I I            0                       181 1900MSGCNT
+     ICUSTDS    E DSCUSTPF
+     ISAVEDS      DS                            250
+->   C           *ENTRY    PLIST
+->   C                     PARM           CUSTDS
+->   C                     PARM           RTNIND 11
+->   C                     PARM           @ERR
+     C                     RESET@ERR
+     C                     MOVELCUSTDS    SAVEDS
+     C           CCUST     CHAINCUSTPF               21
+     C           *IN21     IFEQ *OFF
+     C                     MOVELSAVEDS    CUSTDS
+      *
+     C           CCONT     IFEQ *BLANKS
+     C                     MOVEL'CPF9898' MSGID
+     C                     MOVE CNAME     MSG,01
+     C                     MOVELMSG,01    MSGTXT
+     C                     EXSR @SNDMS
+     C                     MOVE @TRUE     @ERR
+     C                     MOVE *ON       *IN72
+     C                     ENDIF
+      *
+     C           CPHONE    IFEQ 0
+     C                     MOVEL'CPF9898' MSGID
+     C                     MOVE CNAME     MSG,02
+     C                     MOVELMSG,02    MSGTXT
+     C                     EXSR @SNDMS
+     C                     MOVE @TRUE     @ERR
+     C                     MOVE *ON       *IN73
+     C                     ENDIF
+      *
+     C                     MOVE @TRUE     @ERR
+     C                     MOVE *ON       *IN71
+     C                     ENDIF
+      *
+     C                     MOVEAIND       RTNIND
+     C                     RETRN
+     C           *INZSR    BEGSR
+     C                     MOVEA*ALL'0'   IND
+     C                     MOVE @FALSE    @ERR    1
+     C                     ENDSR
+     C           @SNDMS    BEGSR
+     C                     CALL 'QMHSNDPM'
+     C                     PARM           MSGID
+     C                     PARM           MSGF
+     C                     PARM           MSGTXT
+     C                     PARM 65        MSGLEN
+     C                     PARM @DIAG     MSGTYP
+     C                     PARM @CUQUE    MSGQ
+     C                     PARM @PRSTK    MSGSTK
+     C                     PARM           MSGKEY
+     C                     PARM           MSGERR
+     C                     ENDSR
+** MSG ERROR MESSAGES
+NO CONTACT NAME ENTERED . . . . . . . .                          01
+NO TELEPHONE NUMBER ENTERED . . . . . . .                        02

@@ -1,0 +1,16 @@
+/*********************************************************************/
+/*    Program Name:  SFL001CL                                        */
+/*    Description:  CUSTOMER MASTER SEARCH                           */
+/*                                                                   */
+/*    (c) Copyright Jonathan E. Yergin, 1991 USA                     */
+/*        & Wayne Madden, 1993 USA                                   */
+/*********************************************************************/
+
+  PGM
+
+  CALL SFL001
+
+  RCLRSC
+
+FINISH:
+  ENDPGM

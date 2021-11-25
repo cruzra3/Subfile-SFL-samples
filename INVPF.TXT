@@ -1,0 +1,13 @@
+      *  INVPF - Invoice transaction file
+     A                                      UNIQUE
+      *
+     A          R INVR                      TEXT('Customer Invoice Record')
+      *
+     A            ICUST     R               REFFLD(CCUST CUSTPF)
+     A            IINV#          7S 0       COLHDG('Invoice' 'Number')
+     A            IIDAT          7S 0       COLHDG('Invoice' 'Date')
+     A            IGAMT          7P 2       COLHDG('Gross' 'Amount')
+      *
+     A          K ICUST
+     A          K IINV#
+     A          K IIDAT
